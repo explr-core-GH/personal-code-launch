@@ -8,7 +8,7 @@ export function Header() {
         <img 
           src={wblLogo} 
           alt="WBL Program Planner" 
-          className="h-16 w-auto"
+          className="h-24 w-auto"
         />
         <img 
           src={pathwaysLogo} 
