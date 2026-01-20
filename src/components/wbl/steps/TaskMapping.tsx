@@ -5,16 +5,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { OrganizationData } from '@/hooks/useOrganizationData';
 
 interface TaskMappingProps {
   skillData: Map<string, SkillData>;
+  organizationData: OrganizationData;
   onSaveTaskMapping: (skillId: string, value: string) => void;
   onNext: () => void;
   onPrev: () => void;
 }
 
-export function TaskMapping({ skillData, onSaveTaskMapping, onNext, onPrev }: TaskMappingProps) {
-  const step = STEPS[2];
+export function TaskMapping({ skillData, organizationData, onSaveTaskMapping, onNext, onPrev }: TaskMappingProps) {
+  const step = STEPS[3];
   const selectedSkills = SKILLS.filter(s => skillData.get(s.id)?.completed);
   const [loadingSkillId, setLoadingSkillId] = useState<string | null>(null);
   const [textareaValues, setTextareaValues] = useState<Map<string, string>>(new Map());
@@ -34,6 +36,9 @@ export function TaskMapping({ skillData, onSaveTaskMapping, onNext, onPrev }: Ta
           skillName: skill.name,
           skillDescription: skill.description || '',
           selectedTools,
+          organizationName: organizationData.organizationName,
+          interestReason: organizationData.interestReason,
+          numberOfInterns: organizationData.numberOfInterns,
         },
       });
 

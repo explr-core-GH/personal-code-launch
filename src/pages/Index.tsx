@@ -67,6 +67,7 @@ const Index = () => {
         return (
           <TaskMapping
             skillData={skillData}
+            organizationData={organizationData}
             onSaveTaskMapping={saveTaskMapping}
             onNext={() => goToStep(5)}
             onPrev={() => goToStep(3)}
