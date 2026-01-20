@@ -1,5 +1,5 @@
 import { SKILLS, STEPS, SkillData, TaskItem } from '@/data/wblData';
-import { ChevronLeft, ChevronRight, Sparkles, Loader2, Plus, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, Loader2, Plus, Trash2, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
@@ -10,6 +10,8 @@ import { OrganizationData } from '@/hooks/useOrganizationData';
 interface TaskMappingProps {
   skillData: Map<string, SkillData>;
   organizationData: OrganizationData;
+  projectIdea: string;
+  onProjectIdeaChange: (value: string) => void;
   onSaveTaskMapping: (skillId: string, value: string) => void;
   onAddTask: (skillId: string) => void;
   onRemoveTask: (skillId: string, taskId: string) => void;
@@ -18,11 +20,53 @@ interface TaskMappingProps {
   onPrev: () => void;
 }
 
-export function TaskMapping({ skillData, organizationData, onSaveTaskMapping, onAddTask, onRemoveTask, onUpdateTaskDescription, onNext, onPrev }: TaskMappingProps) {
+export function TaskMapping({ skillData, organizationData, projectIdea, onProjectIdeaChange, onSaveTaskMapping, onAddTask, onRemoveTask, onUpdateTaskDescription, onNext, onPrev }: TaskMappingProps) {
   const step = STEPS[3];
   const selectedSkills = SKILLS.filter(s => skillData.get(s.id)?.completed);
   const [loadingTaskId, setLoadingTaskId] = useState<string | null>(null);
   const [textareaValues, setTextareaValues] = useState<Map<string, string>>(new Map());
+  const [isGeneratingIdea, setIsGeneratingIdea] = useState(false);
+  const [localProjectIdea, setLocalProjectIdea] = useState(projectIdea);
+
+  const handleGenerateProjectIdea = async () => {
+    setIsGeneratingIdea(true);
+
+    try {
+      const selectedSkillNames = selectedSkills.map(s => s.name);
+      
+      const { data: responseData, error } = await supabase.functions.invoke('generate-task-suggestion', {
+        body: {
+          type: 'project-idea',
+          organizationName: organizationData.organizationName,
+          interestReason: organizationData.interestReason,
+          numberOfInterns: organizationData.numberOfInterns,
+          selectedSkills: selectedSkillNames,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (responseData?.suggestion) {
+        setLocalProjectIdea(responseData.suggestion);
+        onProjectIdeaChange(responseData.suggestion);
+        toast({
+          title: "Project idea generated!",
+          description: "AI has suggested a project idea based on your organization.",
+        });
+      }
+    } catch (error) {
+      console.error('Error generating project idea:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate project idea. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingIdea(false);
+    }
+  };
 
   const handleGenerateSuggestion = async (skillId: string, taskId: string) => {
     const skill = SKILLS.find(s => s.id === skillId);
@@ -36,12 +80,14 @@ export function TaskMapping({ skillData, organizationData, onSaveTaskMapping, on
     try {
       const { data: responseData, error } = await supabase.functions.invoke('generate-task-suggestion', {
         body: {
+          type: 'task',
           skillName: skill.name,
           skillDescription: skill.description || '',
           selectedTools,
           organizationName: organizationData.organizationName,
           interestReason: organizationData.interestReason,
           numberOfInterns: organizationData.numberOfInterns,
+          projectIdea: localProjectIdea || projectIdea,
         },
       });
 
@@ -102,6 +148,45 @@ export function TaskMapping({ skillData, organizationData, onSaveTaskMapping, on
         <p className="text-sm text-muted-foreground/70 mt-2">
           For each skill, describe what task will allow the student to practice it, when it will occur, and who will supervise.
         </p>
+      </div>
+
+      {/* Project Idea Section */}
+      <div className="bg-card rounded-xl p-5 mb-6 border-2 border-primary/20">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <Lightbulb className="w-6 h-6 text-primary" />
+            <div>
+              <h3 className="font-semibold text-foreground text-lg">Project Idea (Optional)</h3>
+              <p className="text-sm text-muted-foreground">
+                Do you have a specific project or focus area for this internship? This helps generate more relevant task suggestions.
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleGenerateProjectIdea}
+            disabled={isGeneratingIdea}
+            className="flex items-center gap-2 border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+          >
+            {isGeneratingIdea ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Sparkles className="w-4 h-4" />
+            )}
+            Help Me!
+          </Button>
+        </div>
+        <Textarea
+          placeholder="Example: Create a social media marketing campaign for our summer product launch, or organize and digitize our client filing system..."
+          className="bg-surface-dark border-border text-foreground placeholder:text-muted-foreground/50 resize-none"
+          rows={3}
+          value={localProjectIdea}
+          onChange={(e) => {
+            setLocalProjectIdea(e.target.value);
+            onProjectIdeaChange(e.target.value);
+          }}
+        />
       </div>
 
       {selectedSkills.length === 0 ? (
