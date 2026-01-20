@@ -1,13 +1,10 @@
-import { FileText } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { SKILLS } from '@/data/wblData';
 
 interface ProgressOverviewProps {
   completedCount: number;
-  onViewSummary: () => void;
 }
 
-export function ProgressOverview({ completedCount, onViewSummary }: ProgressOverviewProps) {
+export function ProgressOverview({ completedCount }: ProgressOverviewProps) {
   const total = SKILLS.length;
   const percent = Math.round((completedCount / total) * 100);
   const circumference = 175.93;
@@ -15,7 +12,7 @@ export function ProgressOverview({ completedCount, onViewSummary }: ProgressOver
 
   return (
     <div className="bg-card border-b border-border px-6 py-4 flex-shrink-0">
-      <div className="max-w-6xl mx-auto flex items-center justify-between flex-wrap gap-4">
+      <div className="max-w-6xl mx-auto flex items-center gap-4">
         <div className="flex items-center gap-4">
           <div className="relative">
             <svg className="w-16 h-16 transform -rotate-90">
@@ -53,14 +50,6 @@ export function ProgressOverview({ completedCount, onViewSummary }: ProgressOver
             </p>
           </div>
         </div>
-        <Button 
-          variant="secondary" 
-          onClick={onViewSummary}
-          className="flex items-center gap-2"
-        >
-          <FileText className="w-4 h-4" />
-          View Summary
-        </Button>
       </div>
     </div>
   );
