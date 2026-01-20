@@ -49,10 +49,10 @@ export function ToolSelection({ skillData, onToggleTool, onNext, onPrev }: ToolS
                       key={tool}
                       onClick={() => onToggleTool(skill.id, tool)}
                       className={cn(
-                        "px-3 py-1.5 rounded-full text-sm transition-colors",
+                        "px-4 py-2 rounded-lg text-sm font-medium transition-all border-2 shadow-sm",
                         selectedTools.includes(tool)
-                          ? "bg-accent text-accent-foreground"
-                          : "bg-secondary text-muted-foreground hover:bg-muted"
+                          ? "bg-accent text-accent-foreground border-accent shadow-md"
+                          : "bg-card text-foreground border-border hover:border-accent/50 hover:bg-muted"
                       )}
                     >
                       {tool}
