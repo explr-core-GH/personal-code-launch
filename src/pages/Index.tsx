@@ -31,7 +31,7 @@ const Index = () => {
   const { organizationData, updateField } = useOrganizationData();
 
   const programTitle = 'WBL Program Planner';
-  const organizationName = 'Developed by Explr_CSU';
+  const developerName = 'Developed by Explr_CSU';
 
   const goToStep = (step: number) => setCurrentStep(step);
 
@@ -113,7 +113,7 @@ const Index = () => {
 
   return (
     <div className="h-screen w-full flex flex-col overflow-hidden">
-      <Header programTitle={programTitle} organizationName={organizationName} />
+      <Header programTitle={programTitle} organizationName={developerName} />
       
       <ProgressOverview completedCount={getCompletedCount()} />
       
@@ -132,7 +132,7 @@ const Index = () => {
         isOpen={showSummary}
         onClose={() => setShowSummary(false)}
         skillData={skillData}
-        organizationName={organizationName}
+        organizationData={organizationData}
       />
     </div>
   );
