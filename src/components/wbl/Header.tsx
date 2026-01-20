@@ -13,7 +13,7 @@ export function Header({ programTitle, organizationName }: HeaderProps) {
           <img 
             src={pathwaysLogo} 
             alt="Pathways Explr CSU" 
-            className="h-10 w-auto invert"
+            className="h-10 w-auto"
           />
           <h1 className="text-2xl font-bold text-primary-foreground font-display">
             {programTitle}
