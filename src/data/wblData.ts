@@ -42,13 +42,14 @@ export const SKILLS: Skill[] = [
 ];
 
 export const STEPS: Step[] = [
-  { id: 1, title: 'Select Skills', short: 'Skills', description: 'Identify which skills you will explicitly teach' },
-  { id: 2, title: 'Choose Tools', short: 'Tools', description: 'Select the tools and systems you will use for each skill' },
-  { id: 3, title: 'Map Tasks', short: 'Tasks', description: 'Map each skill to a real task or experience' },
-  { id: 4, title: 'Teaching Methods', short: 'Teaching', description: 'Determine how you will teach and model each skill' },
-  { id: 5, title: 'Monitor Progress', short: 'Monitor', description: 'Decide how you will monitor student progress' },
-  { id: 6, title: 'OMJ Alignment', short: 'Align', description: 'Align your choices with the OMJ Readiness Seal' },
-  { id: 7, title: 'Communicate', short: 'Share', description: 'Communicate your plan to students and staff' }
+  { id: 1, title: 'Organization Info', short: 'Start', description: 'Enter basic information about your organization' },
+  { id: 2, title: 'Select Skills', short: 'Skills', description: 'Identify which skills you will explicitly teach' },
+  { id: 3, title: 'Choose Tools', short: 'Tools', description: 'Select the tools and systems you will use for each skill' },
+  { id: 4, title: 'Map Tasks', short: 'Tasks', description: 'Map each skill to a real task or experience' },
+  { id: 5, title: 'Teaching Methods', short: 'Teaching', description: 'Determine how you will teach and model each skill' },
+  { id: 6, title: 'Monitor Progress', short: 'Monitor', description: 'Decide how you will monitor student progress' },
+  { id: 7, title: 'OMJ Alignment', short: 'Align', description: 'Align your choices with the OMJ Readiness Seal' },
+  { id: 8, title: 'Communicate', short: 'Share', description: 'Communicate your plan to students and staff' }
 ];
 
 export const TEACHING_STRATEGIES = [
