@@ -10,7 +10,11 @@ interface AlignmentProps {
 }
 
 const checklistItems = [
-  { id: 'task', label: 'Each skill is taught through a real task', check: (data: SkillData | undefined) => (data?.task_mapping?.length || 0) > 0 },
+  { id: 'task', label: 'Each skill is taught through a real task', check: (data: SkillData | undefined) => {
+    // Check if any task in the tasks array has a description
+    const hasTaskWithDescription = data?.tasks?.some(t => t.description?.trim().length > 0) || false;
+    return hasTaskWithDescription;
+  }},
   { id: 'tools', label: 'Tools support consistency', check: (data: SkillData | undefined) => (data?.selected_tools?.length || 0) > 0 },
   { id: 'teaching', label: 'Teaching strategies are defined', check: (data: SkillData | undefined) => (data?.teaching_strategy?.length || 0) > 0 },
   { id: 'monitoring', label: 'Monitoring approaches are selected', check: (data: SkillData | undefined) => (data?.monitoring_approach?.length || 0) > 0 }
