@@ -101,10 +101,7 @@ const Index = () => {
     <div className="h-screen w-full flex flex-col overflow-hidden">
       <Header programTitle={programTitle} organizationName={organizationName} />
       
-      <ProgressOverview 
-        completedCount={getCompletedCount()} 
-        onViewSummary={() => setShowSummary(true)} 
-      />
+      <ProgressOverview completedCount={getCompletedCount()} />
       
       <StepNavigation 
         currentStep={currentStep} 
