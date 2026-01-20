@@ -1,6 +1,6 @@
 import { X, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { SKILLS, SkillData } from '@/data/wblData';
+import { SKILLS, SkillData, TaskItem } from '@/data/wblData';
 import { OrganizationData } from '@/hooks/useOrganizationData';
 import html2pdf from 'html2pdf.js';
 
@@ -13,6 +13,17 @@ interface SummaryModalProps {
 
 export function SummaryModal({ isOpen, onClose, skillData, organizationData }: SummaryModalProps) {
   const selectedSkills = SKILLS.filter(s => skillData.get(s.id)?.completed);
+
+  const getTasks = (data: SkillData | undefined): TaskItem[] => {
+    if (data?.tasks && data.tasks.length > 0) {
+      return data.tasks.filter(t => t.description.trim());
+    }
+    // Fallback for legacy single task_mapping
+    if (data?.task_mapping) {
+      return [{ id: 'legacy', description: data.task_mapping }];
+    }
+    return [];
+  };
 
   const handleDownloadPDF = () => {
     const pdfHTML = `
@@ -52,7 +63,21 @@ export function SummaryModal({ isOpen, onClose, skillData, organizationData }: S
               </div>
               <div style="background: #f1f5f9; border-left: 4px solid #bcef28; padding: 15px; border-radius: 4px;">
                 ${data?.selected_tools ? `<p style="margin: 0 0 10px 0;"><strong style="color: #334155;">Tools:</strong> <span style="color: #475569;">${data.selected_tools.split(',').join(', ')}</span></p>` : ''}
-                ${data?.task_mapping ? `<p style="margin: 0 0 10px 0;"><strong style="color: #334155;">Task Mapping:</strong> <span style="color: #475569;">${data.task_mapping}</span></p>` : ''}
+                ${(() => {
+                  const tasks = getTasks(data);
+                  if (tasks.length === 0) return '';
+                  if (tasks.length === 1) {
+                    return `<p style="margin: 0 0 10px 0;"><strong style="color: #334155;">Task:</strong> <span style="color: #475569;">${tasks[0].description}</span></p>`;
+                  }
+                  return `
+                    <div style="margin: 0 0 10px 0;">
+                      <strong style="color: #334155;">Tasks:</strong>
+                      <ul style="margin: 5px 0 0 20px; padding: 0; color: #475569;">
+                        ${tasks.map((t, i) => `<li style="margin-bottom: 5px;">${t.description}</li>`).join('')}
+                      </ul>
+                    </div>
+                  `;
+                })()}
                 ${data?.teaching_strategy ? `<p style="margin: 0 0 10px 0;"><strong style="color: #334155;">Teaching Strategies:</strong> <span style="color: #475569;">${data.teaching_strategy.split(',').join(', ')}</span></p>` : ''}
                 ${data?.monitoring_approach ? `<p style="margin: 0;"><strong style="color: #334155;">Monitoring Approaches:</strong> <span style="color: #475569;">${data.monitoring_approach.split(',').join(', ')}</span></p>` : ''}
               </div>
@@ -174,12 +199,28 @@ export function SummaryModal({ isOpen, onClose, skillData, organizationData }: S
                       <span className="text-foreground/80">{data.selected_tools.split(',').join(', ')}</span>
                     </p>
                   )}
-                  {data?.task_mapping && (
-                    <p>
-                      <span className="text-muted-foreground font-semibold">Task:</span>{' '}
-                      <span className="text-foreground/80">{data.task_mapping}</span>
-                    </p>
-                  )}
+                  {(() => {
+                    const tasks = getTasks(data);
+                    if (tasks.length === 0) return null;
+                    if (tasks.length === 1) {
+                      return (
+                        <p>
+                          <span className="text-muted-foreground font-semibold">Task:</span>{' '}
+                          <span className="text-foreground/80">{tasks[0].description}</span>
+                        </p>
+                      );
+                    }
+                    return (
+                      <div>
+                        <span className="text-muted-foreground font-semibold">Tasks:</span>
+                        <ul className="list-disc list-inside mt-1 space-y-1">
+                          {tasks.map((t, i) => (
+                            <li key={t.id} className="text-foreground/80">{t.description}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  })()}
                   {data?.teaching_strategy && (
                     <p>
                       <span className="text-muted-foreground font-semibold">Teaching:</span>{' '}
