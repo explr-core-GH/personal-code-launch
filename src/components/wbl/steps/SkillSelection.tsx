@@ -7,10 +7,11 @@ interface SkillSelectionProps {
   skillData: Map<string, SkillData>;
   onToggleSkill: (skillId: string) => void;
   onNext: () => void;
+  onPrev?: () => void;
 }
 
-export function SkillSelection({ skillData, onToggleSkill, onNext }: SkillSelectionProps) {
-  const step = STEPS[0];
+export function SkillSelection({ skillData, onToggleSkill, onNext, onPrev }: SkillSelectionProps) {
+  const step = STEPS[1];
 
   return (
     <div className="fade-in w-full">
@@ -57,7 +58,14 @@ export function SkillSelection({ skillData, onToggleSkill, onNext }: SkillSelect
         })}
       </div>
       
-      <div className="mt-6 flex justify-end">
+      <div className="mt-6 flex justify-between">
+        {onPrev && (
+          <Button onClick={onPrev} variant="outline">
+            <ChevronRight className="w-5 h-5 mr-2 rotate-180" />
+            Back: Organization Info
+          </Button>
+        )}
+        <div className="flex-1" />
         <Button onClick={onNext} className="bg-accent hover:bg-emerald-hover text-accent-foreground">
           Next: Choose Tools
           <ChevronRight className="w-5 h-5 ml-2" />

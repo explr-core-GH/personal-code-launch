@@ -3,6 +3,7 @@ import { Header } from '@/components/wbl/Header';
 import { ProgressOverview } from '@/components/wbl/ProgressOverview';
 import { StepNavigation } from '@/components/wbl/StepNavigation';
 import { SummaryModal } from '@/components/wbl/SummaryModal';
+import { OrganizationInfo } from '@/components/wbl/steps/OrganizationInfo';
 import { SkillSelection } from '@/components/wbl/steps/SkillSelection';
 import { ToolSelection } from '@/components/wbl/steps/ToolSelection';
 import { TaskMapping } from '@/components/wbl/steps/TaskMapping';
@@ -11,6 +12,7 @@ import { MonitorProgress } from '@/components/wbl/steps/MonitorProgress';
 import { Alignment } from '@/components/wbl/steps/Alignment';
 import { Communication } from '@/components/wbl/steps/Communication';
 import { useSkillData } from '@/hooks/useSkillData';
+import { useOrganizationData } from '@/hooks/useOrganizationData';
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -26,6 +28,8 @@ const Index = () => {
     getCompletedCount
   } = useSkillData();
 
+  const { organizationData, updateField } = useOrganizationData();
+
   const programTitle = 'WBL Program Planner';
   const organizationName = 'Developed by Explr_CSU';
 
@@ -35,61 +39,70 @@ const Index = () => {
     switch (currentStep) {
       case 1:
         return (
-          <SkillSelection
-            skillData={skillData}
-            onToggleSkill={toggleSkill}
+          <OrganizationInfo
+            organizationData={organizationData}
+            onUpdateField={updateField}
             onNext={() => goToStep(2)}
           />
         );
       case 2:
         return (
-          <ToolSelection
+          <SkillSelection
             skillData={skillData}
-            onToggleTool={toggleTool}
+            onToggleSkill={toggleSkill}
             onNext={() => goToStep(3)}
             onPrev={() => goToStep(1)}
           />
         );
       case 3:
         return (
-          <TaskMapping
+          <ToolSelection
             skillData={skillData}
-            onSaveTaskMapping={saveTaskMapping}
+            onToggleTool={toggleTool}
             onNext={() => goToStep(4)}
             onPrev={() => goToStep(2)}
           />
         );
       case 4:
         return (
-          <TeachingMethods
+          <TaskMapping
             skillData={skillData}
-            onToggleStrategy={toggleStrategy}
+            onSaveTaskMapping={saveTaskMapping}
             onNext={() => goToStep(5)}
             onPrev={() => goToStep(3)}
           />
         );
       case 5:
         return (
-          <MonitorProgress
+          <TeachingMethods
             skillData={skillData}
-            onToggleMonitoring={toggleMonitoring}
+            onToggleStrategy={toggleStrategy}
             onNext={() => goToStep(6)}
             onPrev={() => goToStep(4)}
           />
         );
       case 6:
         return (
-          <Alignment
+          <MonitorProgress
             skillData={skillData}
+            onToggleMonitoring={toggleMonitoring}
             onNext={() => goToStep(7)}
             onPrev={() => goToStep(5)}
           />
         );
       case 7:
         return (
+          <Alignment
+            skillData={skillData}
+            onNext={() => goToStep(8)}
+            onPrev={() => goToStep(6)}
+          />
+        );
+      case 8:
+        return (
           <Communication
             onViewSummary={() => setShowSummary(true)}
-            onPrev={() => goToStep(6)}
+            onPrev={() => goToStep(7)}
           />
         );
       default:
