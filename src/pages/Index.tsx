@@ -17,6 +17,7 @@ import { useOrganizationData } from '@/hooks/useOrganizationData';
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showSummary, setShowSummary] = useState(false);
+  const [projectIdea, setProjectIdea] = useState('');
   
   const {
     skillData,
@@ -71,6 +72,8 @@ const Index = () => {
           <TaskMapping
             skillData={skillData}
             organizationData={organizationData}
+            projectIdea={projectIdea}
+            onProjectIdeaChange={setProjectIdea}
             onSaveTaskMapping={saveTaskMapping}
             onAddTask={addTask}
             onRemoveTask={removeTask}
@@ -139,6 +142,7 @@ const Index = () => {
         onClose={() => setShowSummary(false)}
         skillData={skillData}
         organizationData={organizationData}
+        projectIdea={projectIdea}
       />
     </div>
   );

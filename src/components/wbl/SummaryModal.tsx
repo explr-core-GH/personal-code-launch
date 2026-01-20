@@ -9,9 +9,10 @@ interface SummaryModalProps {
   onClose: () => void;
   skillData: Map<string, SkillData>;
   organizationData: OrganizationData;
+  projectIdea?: string;
 }
 
-export function SummaryModal({ isOpen, onClose, skillData, organizationData }: SummaryModalProps) {
+export function SummaryModal({ isOpen, onClose, skillData, organizationData, projectIdea }: SummaryModalProps) {
   const selectedSkills = SKILLS.filter(s => skillData.get(s.id)?.completed);
 
   const getTasks = (data: SkillData | undefined): TaskItem[] => {
@@ -51,6 +52,13 @@ export function SummaryModal({ isOpen, onClose, skillData, organizationData }: S
             </div>
           ` : ''}
         </div>
+
+        ${projectIdea ? `
+        <div style="margin-bottom: 30px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px;">
+          <h2 style="margin: 0 0 10px 0; font-size: 18px; color: #166534;">💡 Project Idea</h2>
+          <p style="margin: 0; color: #15803d; line-height: 1.6;">${projectIdea}</p>
+        </div>
+        ` : ''}
 
         <h2 style="margin: 0 0 20px 0; font-size: 18px; color: #1e293b;">Skills & Program Plan</h2>
         ${selectedSkills.map((skill, index) => {
@@ -181,6 +189,16 @@ export function SummaryModal({ isOpen, onClose, skillData, organizationData }: S
               </div>
             )}
           </div>
+
+          {/* Project Idea Section */}
+          {projectIdea && (
+            <div className="bg-accent/10 rounded-lg p-5 mb-6 border border-accent/30">
+              <h4 className="text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
+                💡 Project Idea
+              </h4>
+              <p className="text-foreground/80 text-sm">{projectIdea}</p>
+            </div>
+          )}
 
           {/* Skills Section */}
           <h4 className="text-lg font-semibold text-foreground mb-4">Skills & Program Plan</h4>
