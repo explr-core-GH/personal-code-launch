@@ -10,7 +10,7 @@ export function Header({ programTitle, organizationName }: HeaderProps) {
     <header className="px-6 py-5 shadow-lg flex-shrink-0 bg-primary">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-primary-foreground font-display mb-1">
+          <h1 className="text-2xl font-bold text-primary-foreground font-garet mb-1">
             {programTitle}
           </h1>
           <p className="text-primary-foreground/90 text-sm">
