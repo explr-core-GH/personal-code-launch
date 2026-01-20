@@ -23,6 +23,9 @@ const Index = () => {
     toggleSkill,
     toggleTool,
     saveTaskMapping,
+    addTask,
+    removeTask,
+    updateTaskDescription,
     toggleStrategy,
     toggleMonitoring,
     getCompletedCount
@@ -69,6 +72,9 @@ const Index = () => {
             skillData={skillData}
             organizationData={organizationData}
             onSaveTaskMapping={saveTaskMapping}
+            onAddTask={addTask}
+            onRemoveTask={removeTask}
+            onUpdateTaskDescription={updateTaskDescription}
             onNext={() => goToStep(5)}
             onPrev={() => goToStep(3)}
           />

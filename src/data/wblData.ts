@@ -13,10 +13,16 @@ export interface Step {
   description: string;
 }
 
+export interface TaskItem {
+  id: string;
+  description: string;
+}
+
 export interface SkillData {
   skill_id: string;
   selected_tools: string;
-  task_mapping: string;
+  task_mapping: string; // Legacy single task
+  tasks: TaskItem[]; // Multiple tasks
   teaching_strategy: string;
   monitoring_approach: string;
   notes: string;

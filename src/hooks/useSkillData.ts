@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react';
-import { SkillData } from '@/data/wblData';
+import { SkillData, TaskItem } from '@/data/wblData';
+
+const generateTaskId = () => `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 export function useSkillData() {
   const [skillData, setSkillData] = useState<Map<string, SkillData>>(new Map());
@@ -16,6 +18,7 @@ export function useSkillData() {
           skill_id: skillId,
           selected_tools: '',
           task_mapping: '',
+          tasks: [{ id: generateTaskId(), description: '' }],
           teaching_strategy: '',
           monitoring_approach: '',
           notes: '',
@@ -53,6 +56,43 @@ export function useSkillData() {
       if (!data) return prev;
       
       newMap.set(skillId, { ...data, task_mapping: value, updated_at: new Date().toISOString() });
+      return newMap;
+    });
+  }, []);
+
+  const addTask = useCallback((skillId: string) => {
+    setSkillData(prev => {
+      const newMap = new Map(prev);
+      const data = newMap.get(skillId);
+      if (!data) return prev;
+      
+      const newTask: TaskItem = { id: generateTaskId(), description: '' };
+      const tasks = [...(data.tasks || []), newTask];
+      newMap.set(skillId, { ...data, tasks, updated_at: new Date().toISOString() });
+      return newMap;
+    });
+  }, []);
+
+  const removeTask = useCallback((skillId: string, taskId: string) => {
+    setSkillData(prev => {
+      const newMap = new Map(prev);
+      const data = newMap.get(skillId);
+      if (!data || !data.tasks || data.tasks.length <= 1) return prev;
+      
+      const tasks = data.tasks.filter(t => t.id !== taskId);
+      newMap.set(skillId, { ...data, tasks, updated_at: new Date().toISOString() });
+      return newMap;
+    });
+  }, []);
+
+  const updateTaskDescription = useCallback((skillId: string, taskId: string, description: string) => {
+    setSkillData(prev => {
+      const newMap = new Map(prev);
+      const data = newMap.get(skillId);
+      if (!data || !data.tasks) return prev;
+      
+      const tasks = data.tasks.map(t => t.id === taskId ? { ...t, description } : t);
+      newMap.set(skillId, { ...data, tasks, updated_at: new Date().toISOString() });
       return newMap;
     });
   }, []);
@@ -110,6 +150,9 @@ export function useSkillData() {
     toggleSkill,
     toggleTool,
     saveTaskMapping,
+    addTask,
+    removeTask,
+    updateTaskDescription,
     toggleStrategy,
     toggleMonitoring,
     getSelectedSkillIds,
