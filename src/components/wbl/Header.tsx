@@ -20,7 +20,7 @@ export function Header({ programTitle, organizationName }: HeaderProps) {
         <img 
           src={pathwaysLogo} 
           alt="Pathways Explr CSU" 
-          className="h-10 w-auto"
+          className="h-14 w-auto"
         />
       </div>
     </header>
