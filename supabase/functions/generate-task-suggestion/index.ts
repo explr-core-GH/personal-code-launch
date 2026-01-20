@@ -80,10 +80,10 @@ When suggesting tasks, consider:
 - The task should be measurable and have clear outcomes
 - Consider the available tools the student will use
 - Tailor the suggestion to the specific organization and their goals
-- If a project idea is provided, align the task with that project
+- IMPORTANT: If a project idea is provided, the task MUST directly contribute to or be part of that project. Frame the task as a specific component or deliverable within the larger project.
 
 Format your response as a concise task description (2-3 sentences) that includes:
-1. What the specific task or experience is
+1. What the specific task or experience is (tied to the project if one exists)
 2. When it should occur or the deadline
 3. Who will supervise or support the student`;
 
@@ -97,18 +97,20 @@ Format your response as a concise task description (2-3 sentences) that includes
         if (numberOfInterns) {
           organizationContext += `\n- Number of interns: ${numberOfInterns}`;
         }
-        if (projectIdea) {
-          organizationContext += `\n- Project Focus: ${projectIdea}`;
-        }
+      }
+
+      let projectContext = '';
+      if (projectIdea) {
+        projectContext = `\n\n🎯 MAIN PROJECT (align task to this): ${projectIdea}`;
       }
 
       userPrompt = `Generate a practical work-based learning task for the following skill:
 
 Skill: ${skillName}
 ${skillDescription ? `Description: ${skillDescription}` : ''}
-${selectedTools && selectedTools.length > 0 ? `Available Tools: ${selectedTools.join(', ')}` : ''}${organizationContext}
+${selectedTools && selectedTools.length > 0 ? `Available Tools: ${selectedTools.join(', ')}` : ''}${organizationContext}${projectContext}
 
-Please provide a specific, actionable task suggestion that a student could perform at ${organizationName || 'this organization'} to develop this skill. Make sure the task is relevant to the organization's context and goals${projectIdea ? ', and aligns with their project focus' : ''}.`;
+${projectIdea ? `IMPORTANT: This task should be a specific component or deliverable that contributes to the main project described above. The task should help the student develop the "${skillName}" skill while advancing the project goals.` : `Please provide a specific, actionable task suggestion that a student could perform at ${organizationName || 'this organization'} to develop this skill.`}`;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
