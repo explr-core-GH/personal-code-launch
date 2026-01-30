@@ -1,14 +1,108 @@
+import { useState } from 'react';
 import { STEPS, COMMUNICATION_ITEMS } from '@/data/wblData';
-import { ChevronLeft, Info, Zap } from 'lucide-react';
+import { ChevronLeft, Info, Zap, Save, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { z } from 'zod';
 
 interface CommunicationProps {
   onViewSummary: () => void;
   onPrev: () => void;
 }
 
+const authSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
 export function Communication({ onViewSummary, onPrev }: CommunicationProps) {
-  const step = STEPS[6];
+  const step = STEPS[7];
+  const { user, signIn, signUp } = useAuth();
+  const { toast } = useToast();
+  
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+
+  const validateForm = () => {
+    try {
+      authSchema.parse({ email, password });
+      setErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const fieldErrors: { email?: string; password?: string } = {};
+        error.errors.forEach((err) => {
+          if (err.path[0] === 'email') fieldErrors.email = err.message;
+          if (err.path[0] === 'password') fieldErrors.password = err.message;
+        });
+        setErrors(fieldErrors);
+      }
+      return false;
+    }
+  };
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    
+    setIsLoading(true);
+    try {
+      if (isSignUp) {
+        const { error } = await signUp(email, password);
+        if (error) {
+          if (error.message.includes('already registered')) {
+            toast({
+              title: 'Account exists',
+              description: 'This email is already registered. Please sign in instead.',
+              variant: 'destructive',
+            });
+            setIsSignUp(false);
+          } else {
+            toast({ title: 'Sign up failed', description: error.message, variant: 'destructive' });
+          }
+        } else {
+          toast({ title: 'Account created!', description: 'You can now save your plan.' });
+          setShowAuthModal(false);
+        }
+      } else {
+        const { error } = await signIn(email, password);
+        if (error) {
+          toast({ title: 'Sign in failed', description: error.message, variant: 'destructive' });
+        } else {
+          toast({ title: 'Welcome back!', description: 'You can now save your plan.' });
+          setShowAuthModal(false);
+        }
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveClick = () => {
+    if (!user) {
+      setShowAuthModal(true);
+    } else {
+      // TODO: Implement save functionality
+      toast({ title: 'Coming soon', description: 'Save functionality will be available soon.' });
+    }
+  };
+
+  const handleResourcesClick = () => {
+    if (!user) {
+      setShowAuthModal(true);
+    } else {
+      // TODO: Implement resources view
+      toast({ title: 'Coming soon', description: 'Resources will be available soon.' });
+    }
+  };
 
   return (
     <div className="fade-in w-full">
@@ -43,6 +137,26 @@ export function Communication({ onViewSummary, onPrev }: CommunicationProps) {
         </div>
       </div>
 
+      {/* Action buttons for saving and resources */}
+      <div className="bg-card rounded-xl p-5 mt-6">
+        <h4 className="font-semibold text-foreground mb-3">Ready to save your plan?</h4>
+        <p className="text-muted-foreground text-sm mb-4">
+          {user 
+            ? "You're signed in! Save your plan to access it later or browse resources."
+            : "Create a free account to save your plan, access resources, and edit it anytime."}
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <Button variant="outline" onClick={handleSaveClick}>
+            <Save className="w-4 h-4 mr-2" />
+            {user ? 'Save Plan' : 'Sign Up to Save'}
+          </Button>
+          <Button variant="outline" onClick={handleResourcesClick}>
+            <BookOpen className="w-4 h-4 mr-2" />
+            {user ? 'View Resources' : 'Sign Up for Resources'}
+          </Button>
+        </div>
+      </div>
+
       <div className="mt-6 flex justify-between">
         <Button variant="secondary" onClick={onPrev}>
           <ChevronLeft className="w-4 h-4 mr-2" />
@@ -53,6 +167,58 @@ export function Communication({ onViewSummary, onPrev }: CommunicationProps) {
           View Summary
         </Button>
       </div>
+
+      {/* Auth Modal */}
+      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{isSignUp ? 'Create an Account' : 'Welcome Back'}</DialogTitle>
+            <DialogDescription>
+              {isSignUp 
+                ? 'Sign up to save your WBL plan and access resources.' 
+                : 'Sign in to access your saved plans and resources.'}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleAuth} className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="modal-email">Email</Label>
+              <Input
+                id="modal-email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
+              />
+              {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="modal-password">Password</Label>
+              <Input
+                id="modal-password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+              />
+              {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+            </div>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Please wait...' : isSignUp ? 'Create Account' : 'Sign In'}
+            </Button>
+          </form>
+          <div className="text-center text-sm mt-2">
+            <button
+              type="button"
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="text-primary hover:underline"
+            >
+              {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

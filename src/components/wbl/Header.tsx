@@ -1,6 +1,6 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { LogOut } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 
 export function Header() {
   const { user, signOut } = useAuth();
@@ -14,11 +14,14 @@ export function Header() {
           </span>
         </div>
         {user && (
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">{user.email}</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <User className="w-4 h-4" />
+              <span className="hidden sm:inline">{user.email}</span>
+            </div>
             <Button variant="ghost" size="sm" onClick={signOut}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline ml-2">Sign Out</span>
             </Button>
           </div>
         )}
