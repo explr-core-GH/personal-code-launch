@@ -17,8 +17,8 @@
     --popover: 217 33% 17%;
     --popover-foreground: 210 40% 98%;
 
-    /* Lime/Chartreuse brand color #bcef28 */
-    --primary: 75 86% 55%;
+    /* Green brand color #14ee7e */
+    --primary: 156 86% 51%;
     --primary-foreground: 0 0% 0%;
 
     --secondary: 217 33% 17%;
@@ -27,8 +27,8 @@
     --muted: 217 33% 17%;
     --muted-foreground: 215 20% 65%;
 
-    /* Lime accent for interactive elements #bcef28 */
-    --accent: 75 86% 55%;
+    /* Green accent for interactive elements #14ee7e */
+    --accent: 156 86% 51%;
     --accent-foreground: 0 0% 0%;
 
     --destructive: 0 84% 60%;
@@ -36,7 +36,7 @@
 
     --border: 217 33% 25%;
     --input: 217 33% 25%;
-    --ring: 75 86% 55%;
+    --ring: 156 86% 51%;
 
     --radius: 0.75rem;
 
@@ -44,18 +44,18 @@
     --surface-dark: 222 47% 7%;
     --surface-card: 217 33% 17%;
     --text-muted: 215 16% 47%;
-    --lime: 75 86% 55%;
-    --emerald: 75 86% 55%;
-    --emerald-hover: 75 86% 60%;
+    --lime: 156 86% 51%;
+    --emerald: 156 86% 51%;
+    --emerald-hover: 156 86% 56%;
 
     --sidebar-background: 222 47% 11%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 75 86% 55%;
+    --sidebar-primary: 156 86% 51%;
     --sidebar-primary-foreground: 0 0% 0%;
     --sidebar-accent: 217 33% 17%;
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 217 33% 25%;
-    --sidebar-ring: 75 86% 55%;
+    --sidebar-ring: 156 86% 51%;
   }
 }
 
