@@ -8,7 +8,7 @@ interface StepNavigationProps {
 
 export function StepNavigation({ currentStep, onStepChange }: StepNavigationProps) {
   return (
-    <div className="bg-background border-b border-border px-6 py-3 overflow-x-auto flex-shrink-0">
+    <div className="bg-secondary px-6 py-2 overflow-x-auto flex-shrink-0">
       <div className="max-w-6xl mx-auto">
         <div className="flex gap-1 min-w-max">
           {STEPS.map(step => (
@@ -16,13 +16,13 @@ export function StepNavigation({ currentStep, onStepChange }: StepNavigationProp
               key={step.id}
               onClick={() => onStepChange(step.id)}
               className={cn(
-                "px-4 py-2.5 text-sm font-medium transition-all whitespace-nowrap uppercase tracking-wide",
+                "px-4 py-2.5 text-sm font-medium transition-all whitespace-nowrap rounded-md",
                 step.id === currentStep
-                  ? "text-primary border-b-2 border-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
             >
-              {step.short}
+              <span className="mr-1.5 opacity-60">{step.id}.</span>{step.short}
             </button>
           ))}
         </div>

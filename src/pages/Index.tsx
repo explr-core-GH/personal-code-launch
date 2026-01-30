@@ -131,7 +131,7 @@ const Index = () => {
         onStepChange={goToStep} 
       />
       
-      <main className="flex-1 overflow-auto px-6 py-6 w-full">
+      <main className="flex-1 overflow-auto px-6 py-6 w-full bg-background">
         <div className="max-w-6xl mx-auto w-full">
           {renderStep()}
         </div>
