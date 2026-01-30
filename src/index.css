@@ -7,55 +7,55 @@
 
 @layer base {
   :root {
-    /* WBL Program Planner - Dark slate with lime accent */
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    /* EXPLR-inspired dark theme with lime accent */
+    --background: 0 0% 7%;
+    --foreground: 0 0% 98%;
 
-    --card: 217 33% 17%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 11%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 217 33% 17%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 11%;
+    --popover-foreground: 0 0% 98%;
 
-    /* Green brand color #14ee7e */
-    --primary: 156 86% 51%;
+    /* Lime/chartreuse brand color matching explr.cc */
+    --primary: 75 100% 62%;
     --primary-foreground: 0 0% 0%;
 
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
 
-    /* Green accent for interactive elements #14ee7e */
-    --accent: 156 86% 51%;
+    /* Lime accent for interactive elements */
+    --accent: 75 100% 62%;
     --accent-foreground: 0 0% 0%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 217 33% 25%;
-    --input: 217 33% 25%;
-    --ring: 156 86% 51%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 75 100% 62%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     /* Custom semantic tokens */
-    --surface-dark: 222 47% 7%;
-    --surface-card: 217 33% 17%;
-    --text-muted: 215 16% 47%;
-    --lime: 156 86% 51%;
-    --emerald: 156 86% 51%;
-    --emerald-hover: 156 86% 56%;
+    --surface-dark: 0 0% 5%;
+    --surface-card: 0 0% 11%;
+    --text-muted: 0 0% 50%;
+    --lime: 75 100% 62%;
+    --emerald: 75 100% 62%;
+    --emerald-hover: 75 100% 68%;
 
-    --sidebar-background: 222 47% 11%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 156 86% 51%;
+    --sidebar-background: 0 0% 7%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 75 100% 62%;
     --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 217 33% 17%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 25%;
-    --sidebar-ring: 156 86% 51%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 75 100% 62%;
   }
 }
 
@@ -70,7 +70,9 @@
   }
 
   h1, h2, h3 {
-    font-family: 'Fraunces', serif;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
 }
 
