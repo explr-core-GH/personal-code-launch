@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { STEPS, COMMUNICATION_ITEMS } from '@/data/wblData';
-import { ChevronLeft, Info, Zap, Save } from 'lucide-react';
+import { ChevronLeft, Info, Zap, Save, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -23,6 +24,7 @@ export function Communication({ onViewSummary, onPrev }: CommunicationProps) {
   const step = STEPS[7];
   const { user, signIn, signUp } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isSignUp, setIsSignUp] = useState(true);
@@ -69,7 +71,7 @@ export function Communication({ onViewSummary, onPrev }: CommunicationProps) {
             toast({ title: 'Sign up failed', description: error.message, variant: 'destructive' });
           }
         } else {
-          toast({ title: 'Account created!', description: 'You can now save your plan.' });
+          toast({ title: 'Account created!', description: 'You can now save your plan and access resources.' });
           setShowAuthModal(false);
         }
       } else {
@@ -77,7 +79,7 @@ export function Communication({ onViewSummary, onPrev }: CommunicationProps) {
         if (error) {
           toast({ title: 'Sign in failed', description: error.message, variant: 'destructive' });
         } else {
-          toast({ title: 'Welcome back!', description: 'You can now save your plan.' });
+          toast({ title: 'Welcome back!', description: 'You can now access your resources.' });
           setShowAuthModal(false);
         }
       }
@@ -86,21 +88,11 @@ export function Communication({ onViewSummary, onPrev }: CommunicationProps) {
     }
   };
 
-  const handleSaveClick = () => {
-    if (!user) {
-      setShowAuthModal(true);
-    } else {
-      // TODO: Implement save functionality
-      toast({ title: 'Coming soon', description: 'Save functionality will be available soon.' });
-    }
-  };
-
   const handleResourcesClick = () => {
     if (!user) {
       setShowAuthModal(true);
     } else {
-      // TODO: Implement resources view
-      toast({ title: 'Coming soon', description: 'Resources will be available soon.' });
+      navigate('/resources');
     }
   };
 
@@ -137,19 +129,32 @@ export function Communication({ onViewSummary, onPrev }: CommunicationProps) {
         </div>
       </div>
 
-      {/* Sign up prompt - only show if not logged in */}
-      {!user && (
-        <div className="bg-card rounded-xl p-5 mt-6">
-          <h4 className="font-semibold text-foreground mb-3">Want to save your plan?</h4>
-          <p className="text-muted-foreground text-sm mb-4">
-            Create a free account to save your plan, access resources, and edit it anytime.
-          </p>
-          <Button variant="outline" onClick={() => setShowAuthModal(true)}>
-            <Save className="w-4 h-4 mr-2" />
-            Sign Up to Save
-          </Button>
-        </div>
-      )}
+      {/* Sign up / Resources prompt */}
+      <div className="bg-card rounded-xl p-5 mt-6">
+        {user ? (
+          <>
+            <h4 className="font-semibold text-foreground mb-3">📚 Explore Resources</h4>
+            <p className="text-muted-foreground text-sm mb-4">
+              Access curated resources for educators, counselors, organizations, and industry partners.
+            </p>
+            <Button variant="outline" onClick={handleResourcesClick}>
+              <BookOpen className="w-4 h-4 mr-2" />
+              View Resources
+            </Button>
+          </>
+        ) : (
+          <>
+            <h4 className="font-semibold text-foreground mb-3">Want to save your plan?</h4>
+            <p className="text-muted-foreground text-sm mb-4">
+              Create a free account to save your plan, access resources, and edit it anytime.
+            </p>
+            <Button variant="outline" onClick={() => setShowAuthModal(true)}>
+              <Save className="w-4 h-4 mr-2" />
+              Sign Up to Save
+            </Button>
+          </>
+        )}
+      </div>
 
       <div className="mt-6 flex justify-between">
         <Button variant="secondary" onClick={onPrev}>
