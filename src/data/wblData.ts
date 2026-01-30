@@ -51,9 +51,9 @@ export const STEPS: Step[] = [
   { id: 1, title: 'Organization Info', short: 'Start', description: 'Enter basic information about your organization' },
   { id: 2, title: 'Select Skills', short: 'Skills', description: 'Identify which skills you will explicitly teach' },
   { id: 3, title: 'Choose Tools', short: 'Tools', description: 'Select the tools that you will use to support each skill' },
-  { id: 4, title: 'Map Tasks', short: 'Tasks', description: 'Map each skill to a real task or experience' },
-  { id: 5, title: 'Teaching Methods', short: 'Teaching', description: 'Determine how you will teach and model each skill' },
-  { id: 6, title: 'Check Alignment', short: 'Check', description: 'Check for completion of each item and see more resources for aligning internship activities with your worksite.' },
+  { id: 4, title: 'Define Experiences', short: 'Tasks', description: 'Define real work experiences for each skill' },
+  { id: 5, title: 'Learning Approaches', short: 'Teaching', description: 'Select approaches for student skill development' },
+  { id: 6, title: 'Monitor Progress', short: 'Check', description: 'Track and assess student skill development' },
   { id: 7, title: 'OMJ Alignment', short: 'Align', description: 'Align your choices with the OMJ Readiness Seal' },
   { id: 8, title: 'Communicate', short: 'Share', description: 'Communicate your plan to students and staff' }
 ];
