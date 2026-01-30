@@ -11,7 +11,7 @@ interface ToolSelectionProps {
 }
 
 export function ToolSelection({ skillData, onToggleTool, onNext, onPrev }: ToolSelectionProps) {
-  const step = STEPS[1];
+  const step = STEPS[2];
   const selectedSkills = SKILLS.filter(s => skillData.get(s.id)?.completed);
 
   return (
