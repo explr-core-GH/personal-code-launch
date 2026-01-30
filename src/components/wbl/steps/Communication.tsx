@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { STEPS, COMMUNICATION_ITEMS } from '@/data/wblData';
-import { ChevronLeft, Info, Zap, Save, BookOpen } from 'lucide-react';
+import { ChevronLeft, Info, Zap, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -137,25 +137,19 @@ export function Communication({ onViewSummary, onPrev }: CommunicationProps) {
         </div>
       </div>
 
-      {/* Action buttons for saving and resources */}
-      <div className="bg-card rounded-xl p-5 mt-6">
-        <h4 className="font-semibold text-foreground mb-3">Ready to save your plan?</h4>
-        <p className="text-muted-foreground text-sm mb-4">
-          {user 
-            ? "You're signed in! Save your plan to access it later or browse resources."
-            : "Create a free account to save your plan, access resources, and edit it anytime."}
-        </p>
-        <div className="flex flex-wrap gap-3">
-          <Button variant="outline" onClick={handleSaveClick}>
+      {/* Sign up prompt - only show if not logged in */}
+      {!user && (
+        <div className="bg-card rounded-xl p-5 mt-6">
+          <h4 className="font-semibold text-foreground mb-3">Want to save your plan?</h4>
+          <p className="text-muted-foreground text-sm mb-4">
+            Create a free account to save your plan, access resources, and edit it anytime.
+          </p>
+          <Button variant="outline" onClick={() => setShowAuthModal(true)}>
             <Save className="w-4 h-4 mr-2" />
-            {user ? 'Save Plan' : 'Sign Up to Save'}
-          </Button>
-          <Button variant="outline" onClick={handleResourcesClick}>
-            <BookOpen className="w-4 h-4 mr-2" />
-            {user ? 'View Resources' : 'Sign Up for Resources'}
+            Sign Up to Save
           </Button>
         </div>
-      </div>
+      )}
 
       <div className="mt-6 flex justify-between">
         <Button variant="secondary" onClick={onPrev}>
