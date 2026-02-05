@@ -10,7 +10,7 @@ export function Header() {
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-xl font-bold tracking-tight text-foreground">
-            EXPLR<span className="text-primary">_</span><span className="text-primary">WBL</span>
+            EXPLR<span className="text-primary">_</span><span className="text-primary">TOOLS</span>
           </span>
         </div>
         {user && (
