@@ -4,8 +4,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { ChevronLeft, Download, Mail, Users, X } from 'lucide-react';
+import { ChevronLeft, Send, Users, X, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface FeedbackProps {
   onPrev: () => void;
@@ -26,6 +27,8 @@ export function Feedback({ onPrev }: FeedbackProps) {
   const { toast } = useToast();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [categoryFeedback, setCategoryFeedback] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [contactInfo, setContactInfo] = useState({
     name: '',
     email: '',
@@ -58,115 +61,83 @@ export function Feedback({ onPrev }: FeedbackProps) {
     setContactInfo(prev => ({ ...prev, [field]: value }));
   };
 
-  const generateFeedbackContent = () => {
-    const lines = [
-      'WBL Program Planner - Feedback Submission',
-      '==========================================',
-      '',
-      'Submitted: ' + new Date().toLocaleString(),
-      '',
-      '--- Contact Information ---',
-      'Name: ' + (contactInfo.name || 'Not provided'),
-      'Email: ' + (contactInfo.email || 'Not provided'),
-      'Organization: ' + (contactInfo.organization || 'Not provided'),
-      'Role: ' + (contactInfo.role || 'Not provided'),
-      '',
-    ];
-
-    selectedCategories.forEach(categoryId => {
-      const category = FEEDBACK_CATEGORIES.find(c => c.id === categoryId);
-      if (category && categoryFeedback[categoryId]) {
-        lines.push(`--- ${category.label} ---`);
-        lines.push(categoryFeedback[categoryId]);
-        lines.push('');
-      }
-    });
-
-    return lines.join('\n');
-  };
-
-  const handleDownloadPDF = async () => {
-    const html = `
-      <html>
-        <head>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 40px; line-height: 1.6; }
-            h1 { color: #1a1a2e; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-            h2 { color: #4a4a6a; margin-top: 24px; }
-            .section { margin-bottom: 20px; }
-            .label { font-weight: bold; color: #333; }
-            .value { margin-left: 8px; }
-            pre { white-space: pre-wrap; background: #f5f5f5; padding: 12px; border-radius: 4px; }
-          </style>
-        </head>
-        <body>
-          <h1>WBL Program Planner - Feedback</h1>
-          <p><strong>Submitted:</strong> ${new Date().toLocaleString()}</p>
-          
-          <h2>Contact Information</h2>
-          <div class="section">
-            <p><span class="label">Name:</span><span class="value">${contactInfo.name || 'Not provided'}</span></p>
-            <p><span class="label">Email:</span><span class="value">${contactInfo.email || 'Not provided'}</span></p>
-            <p><span class="label">Organization:</span><span class="value">${contactInfo.organization || 'Not provided'}</span></p>
-            <p><span class="label">Role:</span><span class="value">${contactInfo.role || 'Not provided'}</span></p>
-          </div>
-          
-          ${selectedCategories.map(categoryId => {
-            const category = FEEDBACK_CATEGORIES.find(c => c.id === categoryId);
-            const feedback = categoryFeedback[categoryId];
-            if (category && feedback) {
-              return `<h2>${category.icon} ${category.label}</h2><pre>${feedback}</pre>`;
-            }
-            return '';
-          }).join('')}
-        </body>
-      </html>
-    `;
-
-    try {
-      const html2pdf = (await import('html2pdf.js')).default;
-      const element = document.createElement('div');
-      element.innerHTML = html;
-      
-      await html2pdf()
-        .set({
-          margin: 10,
-          filename: `wbl-feedback-${new Date().toISOString().split('T')[0]}.pdf`,
-          html2canvas: { scale: 2 },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        })
-        .from(element)
-        .save();
-      
+  const handleSubmitFeedback = async () => {
+    // Check if any feedback has been entered
+    const hasFeedback = selectedCategories.some(id => categoryFeedback[id]?.trim());
+    if (!hasFeedback) {
       toast({
-        title: "PDF Downloaded",
-        description: "Your feedback has been saved as a PDF.",
-      });
-    } catch (error) {
-      toast({
-        title: "Download Failed",
-        description: "Could not generate PDF. Please try again.",
+        title: "No Feedback Entered",
+        description: "Please enter feedback in at least one category.",
         variant: "destructive",
       });
+      return;
     }
-  };
 
-  const handleEmailFeedback = () => {
-    const content = generateFeedbackContent();
-    const subject = encodeURIComponent('WBL Program Planner Feedback');
-    const body = encodeURIComponent(content);
+    setIsSubmitting(true);
     
-    window.open(`mailto:support@explr.cc?subject=${subject}&body=${body}`, '_blank');
-    
-    toast({
-      title: "Email Client Opened",
-      description: "Your default email client should open with the feedback ready to send.",
-    });
+    try {
+      // Build feedback data object
+      const feedbackData: Record<string, string> = {};
+      selectedCategories.forEach(categoryId => {
+        const category = FEEDBACK_CATEGORIES.find(c => c.id === categoryId);
+        if (category && categoryFeedback[categoryId]?.trim()) {
+          feedbackData[category.label] = categoryFeedback[categoryId];
+        }
+      });
+
+      const { error } = await supabase
+        .from('feedback_submissions')
+        .insert({
+          name: contactInfo.name || null,
+          email: contactInfo.email || null,
+          organization: contactInfo.organization || null,
+          role: contactInfo.role || null,
+          feedback_data: feedbackData,
+        });
+
+      if (error) throw error;
+
+      setIsSubmitted(true);
+      toast({
+        title: "Feedback Submitted!",
+        description: "Thank you for helping us improve the WBL Program Planner.",
+      });
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      toast({
+        title: "Submission Failed",
+        description: "Could not submit feedback. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const selectedCategoryData = selectedCategories.map(id => 
     FEEDBACK_CATEGORIES.find(c => c.id === id)!
   );
+
+  // Success state
+  if (isSubmitted) {
+    return (
+      <div className="space-y-6">
+        <Card className="bg-primary/5 border-primary/20">
+          <CardContent className="pt-6 text-center">
+            <div className="text-5xl mb-4">🎉</div>
+            <h2 className="text-2xl font-bold text-foreground mb-2">Thank You!</h2>
+            <p className="text-muted-foreground mb-4">
+              Your feedback has been submitted successfully. We appreciate you taking the time to help us improve the WBL Program Planner.
+            </p>
+            <Button variant="outline" onClick={onPrev}>
+              <ChevronLeft className="w-4 h-4 mr-2" />
+              Back to Previous Step
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -288,20 +259,30 @@ export function Feedback({ onPrev }: FeedbackProps) {
         </div>
       )}
 
-      {/* Action Buttons */}
+      {/* Submit Button */}
       {selectedCategories.length > 0 && (
         <Card className="bg-muted/50">
           <CardContent className="pt-6">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button onClick={handleDownloadPDF} className="flex-1">
-                <Download className="w-4 h-4 mr-2" />
-                Download as PDF
-              </Button>
-              <Button onClick={handleEmailFeedback} variant="outline" className="flex-1">
-                <Mail className="w-4 h-4 mr-2" />
-                Email to support@explr.cc
-              </Button>
-            </div>
+            <Button 
+              onClick={handleSubmitFeedback} 
+              className="w-full"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4 mr-2" />
+                  Submit Feedback
+                </>
+              )}
+            </Button>
+            <p className="text-sm text-muted-foreground text-center mt-2">
+              Your feedback will be sent directly to our team
+            </p>
           </CardContent>
         </Card>
       )}
