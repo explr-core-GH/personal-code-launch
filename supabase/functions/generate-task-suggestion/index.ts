@@ -34,19 +34,30 @@ serve(async (req) => {
     if (type === 'project-idea') {
       console.log("Generating project idea for organization:", organizationName);
       
-      systemPrompt = `You are an expert in work-based learning (WBL) program design and summer internship planning. Your role is to suggest creative, practical project ideas that organizations can assign to summer interns.
+      systemPrompt = `You are an expert in work-based learning (WBL) program design and summer internship planning for K-12 students. Your role is to suggest creative, practical project ideas that organizations can assign to student interns.
+
+CONTENT SAFETY REQUIREMENTS (MANDATORY):
+- All content MUST be appropriate for K-12 students (ages 5-18)
+- Avoid any references to violence, weapons, drugs, alcohol, gambling, or adult themes
+- Focus on educational, constructive, and age-appropriate workplace experiences
+- Ensure all suggested activities comply with youth labor laws and safety standards
+
+FORMATTING REQUIREMENTS:
+- Keep language simple, clear, and easy to read
+- Use short sentences and avoid jargon
+- Be concise - aim for 3-4 sentences maximum
+- Make suggestions actionable and specific
 
 When suggesting project ideas, consider:
 - The project should be achievable within a summer internship timeframe (8-12 weeks)
-- It should provide meaningful learning opportunities for interns
+- It should provide meaningful learning opportunities for students
 - It should deliver real value to the organization
-- It should align with the organization's goals for hosting interns
-- Consider the skills the interns will be developing
+- Activities must be safe and supervised for young learners
 
-Format your response as a clear, concise project description (3-4 sentences) that includes:
-1. What the project is about
-2. The expected deliverable or outcome
-3. How it benefits both the intern and organization`;
+Format your response as:
+1. A clear project title or theme
+2. What the student will create or accomplish
+3. How it benefits both the student and organization`;
 
       let organizationContext = '';
       if (organizationName) {
@@ -55,64 +66,73 @@ Format your response as a clear, concise project description (3-4 sentences) tha
           organizationContext += `\nWhy they're hosting interns: ${interestReason}`;
         }
         if (numberOfInterns) {
-          organizationContext += `\nNumber of interns: ${numberOfInterns}`;
+          organizationContext += `\nNumber of student interns: ${numberOfInterns}`;
         }
         if (selectedSkills && selectedSkills.length > 0) {
           organizationContext += `\nSkills being developed: ${selectedSkills.join(', ')}`;
         }
       }
 
-      userPrompt = `Generate a practical summer internship project idea for the following organization:
+      userPrompt = `Generate a practical summer internship project idea for K-12 students at this organization:
 
 ${organizationContext}
 
-Please suggest a specific, achievable project that would be valuable for both the interns and the organization. The project should help develop the listed skills while providing real business value.`;
+Suggest a specific, achievable project that is safe and appropriate for student learners while providing real value to both parties.`;
 
     } else {
       console.log("Generating task suggestion for skill:", skillName, "at organization:", organizationName);
 
-      systemPrompt = `You are an expert in work-based learning (WBL) program design. Your role is to suggest practical, real-world tasks and experiences that allow students to develop specific skills in a workplace setting.
+      systemPrompt = `You are an expert in work-based learning (WBL) program design for K-12 students. Your role is to suggest practical, real-world tasks that help students develop specific skills in safe workplace settings.
 
-When suggesting tasks, consider:
-- The task should be hands-on and applicable to real workplace scenarios
-- Include a clear deadline or timeframe
-- Specify who should supervise or mentor the student
-- The task should be measurable and have clear outcomes
-- Consider the available tools the student will use
-- Tailor the suggestion to the specific organization and their goals
-- IMPORTANT: If a project idea is provided, the task MUST directly contribute to or be part of that project. Frame the task as a specific component or deliverable within the larger project.
+CONTENT SAFETY REQUIREMENTS (MANDATORY):
+- All content MUST be appropriate for K-12 students (ages 5-18)
+- Avoid any references to violence, weapons, drugs, alcohol, gambling, or adult themes
+- Focus on educational, constructive, and age-appropriate workplace experiences
+- Ensure all suggested activities comply with youth labor laws and safety standards
+- Tasks should always include adult supervision
 
-Format your response as a concise task description (2-3 sentences) that includes:
-1. What the specific task or experience is (tied to the project if one exists)
-2. When it should occur or the deadline
-3. Who will supervise or support the student`;
+FORMATTING REQUIREMENTS:
+- Keep language simple, clear, and easy to read
+- Use short sentences and avoid jargon
+- Be concise - 2-3 sentences maximum
+- Make tasks specific and actionable
+
+When suggesting tasks:
+- The task should be hands-on and safe for young learners
+- Include a clear timeframe
+- Specify who will supervise the student
+- If a project idea is provided, the task MUST contribute to that project
+
+Format your response as:
+1. The specific task (tied to the project if one exists)
+2. Timeline or deadline
+3. Who will supervise`;
 
       let organizationContext = '';
       if (organizationName) {
         organizationContext = `\n\nOrganization Context:
 - Organization Name: ${organizationName}`;
         if (interestReason) {
-          organizationContext += `\n- Why they're hosting interns: ${interestReason}`;
+          organizationContext += `\n- Why they're hosting student interns: ${interestReason}`;
         }
         if (numberOfInterns) {
-          organizationContext += `\n- Number of interns: ${numberOfInterns}`;
+          organizationContext += `\n- Number of student interns: ${numberOfInterns}`;
         }
       }
 
       let projectContext = '';
       if (projectIdea) {
-        projectContext = `\n\n🎯 MAIN PROJECT (align task to this): ${projectIdea}`;
+        projectContext = `\n\n🎯 MAIN PROJECT: ${projectIdea}`;
       }
 
-      userPrompt = `Generate a practical work-based learning task for the following skill:
+      userPrompt = `Generate a K-12 appropriate work-based learning task:
 
 Skill: ${skillName}
 ${skillDescription ? `Description: ${skillDescription}` : ''}
 ${selectedTools && selectedTools.length > 0 ? `Available Tools: ${selectedTools.join(', ')}` : ''}${organizationContext}${projectContext}
 
-${projectIdea ? `IMPORTANT: This task should be a specific component or deliverable that contributes to the main project described above. The task should help the student develop the "${skillName}" skill while advancing the project goals.` : `Please provide a specific, actionable task suggestion that a student could perform at ${organizationName || 'this organization'} to develop this skill.`}`;
+${projectIdea ? `This task should contribute to the main project while developing the "${skillName}" skill. Ensure it's safe and appropriate for student learners.` : `Provide a specific, safe task for a student to develop this skill at ${organizationName || 'this organization'}.`}`;
     }
-
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
