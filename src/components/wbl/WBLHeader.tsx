@@ -1,7 +1,7 @@
 export function WBLHeader() {
   return (
     <div className="px-6 py-4 bg-muted/30 border-b border-border">
-      <div className="max-w-6xl mx-auto">
+      <div>
         <h1 className="text-2xl font-bold text-foreground">
           Work-Based Learning Planning Tool
         </h1>
