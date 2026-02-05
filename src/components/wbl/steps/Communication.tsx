@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { STEPS, COMMUNICATION_ITEMS } from '@/data/wblData';
-import { ChevronLeft, Info, Zap, Save, BookOpen } from 'lucide-react';
+import { ChevronLeft, Download, Save, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -13,7 +13,6 @@ import { z } from 'zod';
 interface CommunicationProps {
   onViewSummary: () => void;
   onPrev: () => void;
-  onNext: () => void;
 }
 
 const authSchema = z.object({
@@ -21,7 +20,7 @@ const authSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
-export function Communication({ onViewSummary, onPrev, onNext }: CommunicationProps) {
+export function Communication({ onViewSummary, onPrev }: CommunicationProps) {
   const step = STEPS[7];
   const { user, signIn, signUp } = useAuth();
   const { toast } = useToast();
@@ -118,18 +117,6 @@ export function Communication({ onViewSummary, onPrev, onNext }: CommunicationPr
         ))}
       </div>
 
-      <div className="bg-accent/20 border border-accent/40 rounded-xl p-5 mt-6">
-        <div className="flex items-start gap-3">
-          <Info className="w-6 h-6 text-accent mt-0.5" />
-          <div>
-            <h4 className="font-semibold text-accent mb-1">Pro Tip</h4>
-            <p className="text-accent/90 text-sm">
-              Create an orientation packet or handbook that covers all these areas. This gives students a reference they can return to throughout their internship.
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Sign up / Resources prompt */}
       <div className="bg-card rounded-xl p-5 mt-6">
         {user ? (
@@ -157,20 +144,23 @@ export function Communication({ onViewSummary, onPrev, onNext }: CommunicationPr
         )}
       </div>
 
-      <div className="mt-6 flex justify-between">
+      {/* View Summary CTA */}
+      <div className="mt-8 flex flex-col items-center">
+        <Button 
+          onClick={onViewSummary} 
+          size="lg"
+          className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 py-6 h-auto"
+        >
+          <Download className="w-5 h-5 mr-2" />
+          View and Download Summary
+        </Button>
+      </div>
+
+      <div className="mt-6 flex justify-start">
         <Button variant="secondary" onClick={onPrev}>
           <ChevronLeft className="w-4 h-4 mr-2" />
           Previous
         </Button>
-        <div className="flex gap-3">
-          <Button onClick={onViewSummary} variant="outline">
-            <Zap className="w-5 h-5 mr-2" />
-            View Summary
-          </Button>
-          <Button onClick={onNext} className="bg-accent hover:bg-emerald-hover text-accent-foreground">
-            Next
-          </Button>
-        </div>
       </div>
 
       {/* Auth Modal */}

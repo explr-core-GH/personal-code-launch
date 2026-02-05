@@ -114,7 +114,6 @@ const Index = () => {
           <Communication
             onViewSummary={() => setShowSummary(true)}
             onPrev={() => goToStep(7)}
-            onNext={() => goToStep(9)}
           />
         );
       case 9:
