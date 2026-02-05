@@ -13,8 +13,8 @@ const comingSoonTools = [
 
 export function ToolsTabs({ children }: ToolsTabsProps) {
   return (
-    <Tabs defaultValue="wbl" className="w-full h-full flex flex-col">
-      <div className="px-6 pt-4 border-b border-border bg-background">
+    <Tabs defaultValue="wbl" className="w-full flex-1 flex flex-col min-h-0">
+      <div className="px-6 pt-4 border-b border-border bg-background flex-shrink-0">
         <TabsList className="h-auto p-1 bg-muted/50 rounded-lg">
           <TabsTrigger 
             value="wbl" 
@@ -39,7 +39,11 @@ export function ToolsTabs({ children }: ToolsTabsProps) {
         </TabsList>
       </div>
 
-      <TabsContent value="wbl" className="flex-1 flex flex-col mt-0 overflow-hidden data-[state=active]:flex">
+      <TabsContent 
+        value="wbl" 
+        forceMount
+        className="flex-1 flex flex-col min-h-0 mt-0 data-[state=inactive]:hidden"
+      >
         {children}
       </TabsContent>
 
@@ -47,7 +51,7 @@ export function ToolsTabs({ children }: ToolsTabsProps) {
         <TabsContent 
           key={tool.id} 
           value={tool.id} 
-          className="flex-1 flex items-center justify-center mt-0 data-[state=active]:flex"
+          className="flex-1 flex items-center justify-center mt-0"
         >
           <div className="text-center space-y-4">
             <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center">
