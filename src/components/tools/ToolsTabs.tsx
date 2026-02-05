@@ -7,7 +7,7 @@ interface ToolsTabsProps {
 
 const comingSoonTools = [
   { id: 'pathways', label: 'Pathways Explorer', icon: GraduationCap },
-  { id: 'mentorship', label: 'Mentorship Tracker', icon: Users },
+  { id: 'mentorship', label: 'Mentorship', icon: Users },
   { id: 'analytics', label: 'Program Analytics', icon: BarChart3 },
 ];
 
