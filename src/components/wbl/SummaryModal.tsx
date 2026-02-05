@@ -1,9 +1,7 @@
-import { X, Download } from 'lucide-react';
+import { X, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SKILLS, SkillData, TaskItem } from '@/data/wblData';
 import { OrganizationData } from '@/hooks/useOrganizationData';
-import html2pdf from 'html2pdf.js';
-
 interface SummaryModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -26,87 +24,115 @@ export function SummaryModal({ isOpen, onClose, skillData, organizationData, pro
     return [];
   };
 
-  const handleDownloadPDF = () => {
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
     const pdfHTML = `
-      <div style="font-family: 'DM Sans', Arial, sans-serif; color: #1e293b; padding: 20px;">
-        <div style="text-align: center; padding: 30px 0; border-bottom: 2px solid #bcef28; margin-bottom: 30px;">
-          <h1 style="margin: 0 0 10px 0; font-size: 32px; color: #bcef28;">WBL Program Summary</h1>
-          <p style="margin: 0; color: #334155; font-size: 18px; font-weight: 600;">${organizationData.organizationName}</p>
-          <p style="margin: 10px 0 0 0; color: #64748b; font-size: 12px;">Generated on ${new Date().toLocaleDateString()}</p>
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>WBL Program Summary - ${organizationData.organizationName}</title>
+        <style>
+          * { box-sizing: border-box; }
+          body { font-family: 'DM Sans', Arial, sans-serif; color: #1e293b; padding: 20px; margin: 0; }
+          .header { text-align: center; padding: 30px 0; border-bottom: 2px solid #bcef28; margin-bottom: 30px; }
+          .header h1 { margin: 0 0 10px 0; font-size: 32px; color: #65a30d; }
+          .header .org-name { margin: 0; color: #334155; font-size: 18px; font-weight: 600; }
+          .header .date { margin: 10px 0 0 0; color: #64748b; font-size: 12px; }
+          .section { margin-bottom: 30px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; }
+          .section h2 { margin: 0 0 15px 0; font-size: 18px; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
+          .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+          .grid p { margin: 0; }
+          .grid .full-width { grid-column: span 2; }
+          .project-idea { background: #f0fdf4; border: 1px solid #bbf7d0; }
+          .project-idea h2 { color: #166534; }
+          .project-idea p { color: #15803d; line-height: 1.6; }
+          .skill-card { margin-bottom: 25px; page-break-inside: avoid; }
+          .skill-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+          .skill-header .icon { font-size: 28px; }
+          .skill-header h3 { margin: 0; font-size: 20px; font-weight: 600; color: #1e293b; }
+          .skill-content { background: #f1f5f9; border-left: 4px solid #bcef28; padding: 15px; border-radius: 4px; }
+          .skill-content p { margin: 0 0 10px 0; }
+          .skill-content p:last-child { margin-bottom: 0; }
+          .label { color: #334155; font-weight: 600; }
+          .value { color: #475569; }
+          ul { margin: 5px 0 0 20px; padding: 0; color: #475569; }
+          li { margin-bottom: 5px; }
+          @media print {
+            body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+            .section, .skill-content { background: #f8fafc !important; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>WBL Program Summary</h1>
+          <p class="org-name">${organizationData.organizationName}</p>
+          <p class="date">Generated on ${new Date().toLocaleDateString()}</p>
         </div>
         
-        <div style="margin-bottom: 30px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px;">
-          <h2 style="margin: 0 0 15px 0; font-size: 18px; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Organization Information</h2>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <p style="margin: 0;"><strong style="color: #334155;">Contact:</strong> <span style="color: #475569;">${organizationData.firstName} ${organizationData.lastName}</span></p>
-            <p style="margin: 0;"><strong style="color: #334155;">Email:</strong> <span style="color: #475569;">${organizationData.contactEmail}</span></p>
-            ${organizationData.contactNumber ? `<p style="margin: 0;"><strong style="color: #334155;">Phone:</strong> <span style="color: #475569;">${organizationData.contactNumber}</span></p>` : ''}
-            ${organizationData.organizationWebsite ? `<p style="margin: 0;"><strong style="color: #334155;">Website:</strong> <span style="color: #475569;">${organizationData.organizationWebsite}</span></p>` : ''}
-            ${organizationData.internshipAddress ? `<p style="margin: 0; grid-column: span 2;"><strong style="color: #334155;">Address:</strong> <span style="color: #475569;">${organizationData.internshipAddress}</span></p>` : ''}
-            ${organizationData.numberOfInterns ? `<p style="margin: 0;"><strong style="color: #334155;">Number of Interns:</strong> <span style="color: #475569;">${organizationData.numberOfInterns}</span></p>` : ''}
+        <div class="section">
+          <h2>Organization Information</h2>
+          <div class="grid">
+            <p><span class="label">Contact:</span> <span class="value">${organizationData.firstName} ${organizationData.lastName}</span></p>
+            <p><span class="label">Email:</span> <span class="value">${organizationData.contactEmail}</span></p>
+            ${organizationData.contactNumber ? `<p><span class="label">Phone:</span> <span class="value">${organizationData.contactNumber}</span></p>` : ''}
+            ${organizationData.organizationWebsite ? `<p><span class="label">Website:</span> <span class="value">${organizationData.organizationWebsite}</span></p>` : ''}
+            ${organizationData.internshipAddress ? `<p class="full-width"><span class="label">Address:</span> <span class="value">${organizationData.internshipAddress}</span></p>` : ''}
+            ${organizationData.numberOfInterns ? `<p><span class="label">Number of Interns:</span> <span class="value">${organizationData.numberOfInterns}</span></p>` : ''}
           </div>
           ${organizationData.interestReason ? `
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
-              <p style="margin: 0;"><strong style="color: #334155;">Why hosting WBL:</strong></p>
-              <p style="margin: 5px 0 0 0; color: #475569; font-style: italic;">${organizationData.interestReason}</p>
+              <p><span class="label">Why hosting WBL:</span></p>
+              <p class="value" style="font-style: italic;">${organizationData.interestReason}</p>
             </div>
           ` : ''}
         </div>
 
         ${projectIdea ? `
-        <div style="margin-bottom: 30px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px;">
-          <h2 style="margin: 0 0 10px 0; font-size: 18px; color: #166534;">💡 Project Idea</h2>
-          <p style="margin: 0; color: #15803d; line-height: 1.6;">${projectIdea}</p>
+        <div class="section project-idea">
+          <h2>💡 Project Idea</h2>
+          <p>${projectIdea}</p>
         </div>
         ` : ''}
 
         <h2 style="margin: 0 0 20px 0; font-size: 18px; color: #1e293b;">Skills & Program Plan</h2>
         ${selectedSkills.map((skill, index) => {
           const data = skillData.get(skill.id);
+          const tasks = getTasks(data);
           return `
-            <div style="margin-bottom: 25px; page-break-inside: avoid;">
-              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-                <span style="font-size: 28px;">${skill.icon}</span>
-                <h2 style="margin: 0; font-size: 20px; font-weight: 600; color: #1e293b;">${index + 1}. ${skill.name}</h2>
+            <div class="skill-card">
+              <div class="skill-header">
+                <span class="icon">${skill.icon}</span>
+                <h3>${index + 1}. ${skill.name}</h3>
               </div>
-              <div style="background: #f1f5f9; border-left: 4px solid #bcef28; padding: 15px; border-radius: 4px;">
-                ${data?.selected_tools ? `<p style="margin: 0 0 10px 0;"><strong style="color: #334155;">Tools:</strong> <span style="color: #475569;">${data.selected_tools.split(',').join(', ')}</span></p>` : ''}
-                ${(() => {
-                  const tasks = getTasks(data);
-                  if (tasks.length === 0) return '';
-                  if (tasks.length === 1) {
-                    return `<p style="margin: 0 0 10px 0;"><strong style="color: #334155;">Task:</strong> <span style="color: #475569;">${tasks[0].description}</span></p>`;
-                  }
-                  return `
-                    <div style="margin: 0 0 10px 0;">
-                      <strong style="color: #334155;">Tasks:</strong>
-                      <ul style="margin: 5px 0 0 20px; padding: 0; color: #475569;">
-                        ${tasks.map((t, i) => `<li style="margin-bottom: 5px;">${t.description}</li>`).join('')}
-                      </ul>
-                    </div>
-                  `;
-                })()}
-                ${data?.teaching_strategy ? `<p style="margin: 0 0 10px 0;"><strong style="color: #334155;">Teaching Strategies:</strong> <span style="color: #475569;">${data.teaching_strategy.split(',').join(', ')}</span></p>` : ''}
-                ${data?.monitoring_approach ? `<p style="margin: 0;"><strong style="color: #334155;">Monitoring Approaches:</strong> <span style="color: #475569;">${data.monitoring_approach.split(',').join(', ')}</span></p>` : ''}
+              <div class="skill-content">
+                ${data?.selected_tools ? `<p><span class="label">Tools:</span> <span class="value">${data.selected_tools.split(',').join(', ')}</span></p>` : ''}
+                ${tasks.length === 1 ? `<p><span class="label">Task:</span> <span class="value">${tasks[0].description}</span></p>` : ''}
+                ${tasks.length > 1 ? `
+                  <div>
+                    <span class="label">Tasks:</span>
+                    <ul>
+                      ${tasks.map(t => `<li>${t.description}</li>`).join('')}
+                    </ul>
+                  </div>
+                ` : ''}
+                ${data?.teaching_strategy ? `<p><span class="label">Teaching Strategies:</span> <span class="value">${data.teaching_strategy.split(',').join(', ')}</span></p>` : ''}
+                ${data?.monitoring_approach ? `<p><span class="label">Monitoring Approaches:</span> <span class="value">${data.monitoring_approach.split(',').join(', ')}</span></p>` : ''}
               </div>
             </div>
           `;
         }).join('')}
-      </div>
+      </body>
+      </html>
     `;
 
-    const element = document.createElement('div');
-    element.innerHTML = pdfHTML;
-
-    const opt = {
-      margin: 10,
-      filename: `WBL-Program-Summary-${organizationData.organizationName.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { orientation: 'portrait' as const, unit: 'mm' as const, format: 'a4' as const }
+    printWindow.document.write(pdfHTML);
+    printWindow.document.close();
+    printWindow.onload = () => {
+      printWindow.print();
     };
-
-    html2pdf().set(opt).from(element).save();
   };
 
   if (!isOpen) return null;
@@ -123,10 +149,10 @@ export function SummaryModal({ isOpen, onClose, skillData, organizationData, pro
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={handleDownloadPDF}
-              title="Download as PDF"
+              onClick={handlePrint}
+              title="Print / Save as PDF"
             >
-              <Download className="w-5 h-5 text-accent" />
+              <Printer className="w-5 h-5 text-accent" />
             </Button>
             <Button variant="ghost" size="icon" onClick={onClose}>
               <X className="w-5 h-5 text-muted-foreground" />
