@@ -3,7 +3,7 @@ import { ToolsTabs } from '@/components/tools/ToolsTabs';
 
 const Index = () => {
   return (
-    <div className="h-screen w-full flex flex-col overflow-hidden">
+    <div className="min-h-screen w-full flex flex-col">
       <Header />
       <ToolsTabs />
     </div>
