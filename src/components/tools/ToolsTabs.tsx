@@ -153,23 +153,23 @@ export function ToolsTabs() {
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Tool Tabs */}
-      <div className="px-6 pt-4 border-b border-border bg-background flex-shrink-0">
-        <div className="inline-flex h-auto p-1 bg-muted/50 rounded-lg">
+      <div className="px-6 pt-6 pb-4 border-b border-border bg-background flex-shrink-0">
+        <div className="flex gap-2">
           {tools.map((tool) => (
             <button
               key={tool.id}
               onClick={() => setActiveTool(tool.id)}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all",
+                "flex items-center gap-3 px-5 py-3 text-base font-semibold rounded-lg transition-all border-2",
                 activeTool === tool.id
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "bg-primary text-primary-foreground border-primary shadow-lg"
+                  : "bg-card text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
               )}
             >
-              <tool.icon className="w-4 h-4" />
+              <tool.icon className="w-5 h-5" />
               <span>{tool.label}</span>
               {tool.comingSoon && (
-                <span className="ml-1 text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                <span className="ml-1 text-xs bg-background/20 text-current px-2 py-0.5 rounded-full font-medium">
                   Soon
                 </span>
               )}
