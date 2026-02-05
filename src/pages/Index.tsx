@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Header } from '@/components/wbl/Header';
+import { ToolsTabs } from '@/components/tools/ToolsTabs';
+import { WBLHeader } from '@/components/wbl/WBLHeader';
 import { ProgressOverview } from '@/components/wbl/ProgressOverview';
 import { StepNavigation } from '@/components/wbl/StepNavigation';
 import { SummaryModal } from '@/components/wbl/SummaryModal';
@@ -34,9 +36,6 @@ const Index = () => {
   } = useSkillData();
 
   const { organizationData, updateField } = useOrganizationData();
-
-  const programTitle = 'WBL Program Planner';
-  const developerName = 'Developed by Explr_CSU';
 
   const goToStep = (step: number) => setCurrentStep(step);
 
@@ -131,26 +130,30 @@ const Index = () => {
     <div className="h-screen w-full flex flex-col overflow-hidden">
       <Header />
       
-      <ProgressOverview completedCount={getCompletedCount()} />
-      
-      <StepNavigation 
-        currentStep={currentStep} 
-        onStepChange={goToStep} 
-      />
-      
-      <main className="flex-1 overflow-auto px-6 py-6 w-full">
-        <div className="max-w-6xl mx-auto w-full">
-          {renderStep()}
-        </div>
-      </main>
+      <ToolsTabs>
+        <WBLHeader />
+        
+        <ProgressOverview completedCount={getCompletedCount()} />
+        
+        <StepNavigation 
+          currentStep={currentStep} 
+          onStepChange={goToStep} 
+        />
+        
+        <main className="flex-1 overflow-auto px-6 py-6 w-full">
+          <div className="max-w-6xl mx-auto w-full">
+            {renderStep()}
+          </div>
+        </main>
 
-      <SummaryModal
-        isOpen={showSummary}
-        onClose={() => setShowSummary(false)}
-        skillData={skillData}
-        organizationData={organizationData}
-        projectIdea={projectIdea}
-      />
+        <SummaryModal
+          isOpen={showSummary}
+          onClose={() => setShowSummary(false)}
+          skillData={skillData}
+          organizationData={organizationData}
+          projectIdea={projectIdea}
+        />
+      </ToolsTabs>
     </div>
   );
 };
