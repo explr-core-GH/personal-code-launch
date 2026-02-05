@@ -117,6 +117,18 @@ export function Communication({ onViewSummary, onPrev }: CommunicationProps) {
         ))}
       </div>
 
+      {/* View Summary CTA */}
+      <div className="mt-8 flex flex-col items-center">
+        <Button 
+          onClick={onViewSummary} 
+          size="lg"
+          className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 py-6 h-auto"
+        >
+          <Download className="w-5 h-5 mr-2" />
+          View and Download Summary
+        </Button>
+      </div>
+
       {/* Sign up / Resources prompt */}
       <div className="bg-card rounded-xl p-5 mt-6">
         {user ? (
@@ -142,18 +154,6 @@ export function Communication({ onViewSummary, onPrev }: CommunicationProps) {
             </Button>
           </>
         )}
-      </div>
-
-      {/* View Summary CTA */}
-      <div className="mt-8 flex flex-col items-center">
-        <Button 
-          onClick={onViewSummary} 
-          size="lg"
-          className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 py-6 h-auto"
-        >
-          <Download className="w-5 h-5 mr-2" />
-          View and Download Summary
-        </Button>
       </div>
 
       <div className="mt-6 flex justify-start">
