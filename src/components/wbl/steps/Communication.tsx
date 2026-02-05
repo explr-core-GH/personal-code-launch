@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { STEPS, COMMUNICATION_ITEMS } from '@/data/wblData';
-import { ChevronLeft, Download, Save, BookOpen } from 'lucide-react';
+import { ChevronLeft, Download, Save, BookOpen, FileText, NotebookPen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -118,7 +118,7 @@ export function Communication({ onViewSummary, onPrev }: CommunicationProps) {
       </div>
 
       {/* View Summary CTA */}
-      <div className="mt-8 flex flex-col items-center">
+      <div className="mt-8 flex flex-col items-center gap-4">
         <Button 
           onClick={onViewSummary} 
           size="lg"
@@ -127,6 +127,26 @@ export function Communication({ onViewSummary, onPrev }: CommunicationProps) {
           <Download className="w-5 h-5 mr-2" />
           View and Download Summary
         </Button>
+        
+        {/* Coming Soon buttons */}
+        <div className="flex flex-wrap justify-center gap-3">
+          <Button 
+            variant="outline" 
+            disabled 
+            className="opacity-60 cursor-not-allowed"
+          >
+            <FileText className="w-4 h-4 mr-2" />
+            Coming Soon: Generate Handbook
+          </Button>
+          <Button 
+            variant="outline" 
+            disabled 
+            className="opacity-60 cursor-not-allowed"
+          >
+            <NotebookPen className="w-4 h-4 mr-2" />
+            Coming Soon: Generate Student Workbook
+          </Button>
+        </div>
       </div>
 
       {/* Sign up / Resources prompt */}
