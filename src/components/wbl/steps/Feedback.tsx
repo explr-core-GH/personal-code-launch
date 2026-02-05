@@ -3,9 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { ChevronLeft, Download, Mail, MessageSquare, Lightbulb, BookOpen, Users } from 'lucide-react';
+import { ChevronLeft, Download, Mail, Users, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface FeedbackProps {
@@ -13,28 +12,25 @@ interface FeedbackProps {
 }
 
 const FEEDBACK_CATEGORIES = [
-  { id: 'skills', label: 'Skill Options', icon: '🎯', description: 'Suggestions for skills to add or modify' },
-  { id: 'tools', label: 'Tool Suggestions', icon: '🛠️', description: 'Tools that should be added to each skill' },
-  { id: 'tasks', label: 'Task/Experience Ideas', icon: '📋', description: 'Work experiences to include' },
-  { id: 'teaching', label: 'Teaching Strategies', icon: '📚', description: 'Learning approaches to add' },
-  { id: 'monitoring', label: 'Progress Monitoring', icon: '📊', description: 'Assessment methods to include' },
-  { id: 'resources', label: 'Resource Suggestions', icon: '📁', description: 'Resources for the library' },
-  { id: 'ui', label: 'User Interface', icon: '💻', description: 'Usability and design feedback' },
-  { id: 'other', label: 'Other', icon: '💡', description: 'Any other suggestions' },
+  { id: 'skills', label: 'Skill Options', icon: '🎯', description: 'Suggestions for skills to add or modify', placeholder: 'Suggest new skills to add, modifications to existing skills, or skills that should be removed...' },
+  { id: 'tools', label: 'Tool Suggestions', icon: '🛠️', description: 'Tools that should be added to each skill', placeholder: 'Suggest tools or resources that should be available for each skill...' },
+  { id: 'tasks', label: 'Task/Experience Ideas', icon: '📋', description: 'Work experiences to include', placeholder: 'Suggest work experiences, projects, or tasks that organizations could assign to students...' },
+  { id: 'teaching', label: 'Teaching Strategies', icon: '📚', description: 'Learning approaches to add', placeholder: 'Suggest teaching methods, instructional approaches, or learning strategies to add...' },
+  { id: 'monitoring', label: 'Progress Monitoring', icon: '📊', description: 'Assessment methods to include', placeholder: 'Suggest ways to track, assess, or monitor student progress...' },
+  { id: 'resources', label: 'Resource Suggestions', icon: '📁', description: 'Resources for the library', placeholder: 'Suggest documents, links, videos, or templates for the resource library...' },
+  { id: 'ui', label: 'User Interface', icon: '💻', description: 'Usability and design feedback', placeholder: 'Share feedback about the design, usability, or user experience...' },
+  { id: 'other', label: 'Other', icon: '💡', description: 'Any other suggestions', placeholder: 'Any other feedback, suggestions, or comments...' },
 ];
 
 export function Feedback({ onPrev }: FeedbackProps) {
   const { toast } = useToast();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [feedbackData, setFeedbackData] = useState({
+  const [categoryFeedback, setCategoryFeedback] = useState<Record<string, string>>({});
+  const [contactInfo, setContactInfo] = useState({
     name: '',
     email: '',
     organization: '',
     role: '',
-    skillSuggestions: '',
-    toolSuggestions: '',
-    resourceSuggestions: '',
-    generalComments: '',
   });
 
   const toggleCategory = (categoryId: string) => {
@@ -45,8 +41,21 @@ export function Feedback({ onPrev }: FeedbackProps) {
     );
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFeedbackData(prev => ({ ...prev, [field]: value }));
+  const removeCategory = (categoryId: string) => {
+    setSelectedCategories(prev => prev.filter(id => id !== categoryId));
+    setCategoryFeedback(prev => {
+      const updated = { ...prev };
+      delete updated[categoryId];
+      return updated;
+    });
+  };
+
+  const handleFeedbackChange = (categoryId: string, value: string) => {
+    setCategoryFeedback(prev => ({ ...prev, [categoryId]: value }));
+  };
+
+  const handleContactChange = (field: string, value: string) => {
+    setContactInfo(prev => ({ ...prev, [field]: value }));
   };
 
   const generateFeedbackContent = () => {
@@ -57,49 +66,26 @@ export function Feedback({ onPrev }: FeedbackProps) {
       'Submitted: ' + new Date().toLocaleString(),
       '',
       '--- Contact Information ---',
-      'Name: ' + (feedbackData.name || 'Not provided'),
-      'Email: ' + (feedbackData.email || 'Not provided'),
-      'Organization: ' + (feedbackData.organization || 'Not provided'),
-      'Role: ' + (feedbackData.role || 'Not provided'),
-      '',
-      '--- Feedback Categories ---',
-      selectedCategories.length > 0 
-        ? selectedCategories.map(id => FEEDBACK_CATEGORIES.find(c => c.id === id)?.label).join(', ')
-        : 'None selected',
+      'Name: ' + (contactInfo.name || 'Not provided'),
+      'Email: ' + (contactInfo.email || 'Not provided'),
+      'Organization: ' + (contactInfo.organization || 'Not provided'),
+      'Role: ' + (contactInfo.role || 'Not provided'),
       '',
     ];
 
-    if (feedbackData.skillSuggestions) {
-      lines.push('--- Skill & Tool Suggestions ---');
-      lines.push(feedbackData.skillSuggestions);
-      lines.push('');
-    }
-
-    if (feedbackData.toolSuggestions) {
-      lines.push('--- Task & Teaching Suggestions ---');
-      lines.push(feedbackData.toolSuggestions);
-      lines.push('');
-    }
-
-    if (feedbackData.resourceSuggestions) {
-      lines.push('--- Resource Suggestions ---');
-      lines.push(feedbackData.resourceSuggestions);
-      lines.push('');
-    }
-
-    if (feedbackData.generalComments) {
-      lines.push('--- General Comments ---');
-      lines.push(feedbackData.generalComments);
-      lines.push('');
-    }
+    selectedCategories.forEach(categoryId => {
+      const category = FEEDBACK_CATEGORIES.find(c => c.id === categoryId);
+      if (category && categoryFeedback[categoryId]) {
+        lines.push(`--- ${category.label} ---`);
+        lines.push(categoryFeedback[categoryId]);
+        lines.push('');
+      }
+    });
 
     return lines.join('\n');
   };
 
   const handleDownloadPDF = async () => {
-    const content = generateFeedbackContent();
-    
-    // Create a simple HTML structure for pdf generation
     const html = `
       <html>
         <head>
@@ -119,21 +105,20 @@ export function Feedback({ onPrev }: FeedbackProps) {
           
           <h2>Contact Information</h2>
           <div class="section">
-            <p><span class="label">Name:</span><span class="value">${feedbackData.name || 'Not provided'}</span></p>
-            <p><span class="label">Email:</span><span class="value">${feedbackData.email || 'Not provided'}</span></p>
-            <p><span class="label">Organization:</span><span class="value">${feedbackData.organization || 'Not provided'}</span></p>
-            <p><span class="label">Role:</span><span class="value">${feedbackData.role || 'Not provided'}</span></p>
+            <p><span class="label">Name:</span><span class="value">${contactInfo.name || 'Not provided'}</span></p>
+            <p><span class="label">Email:</span><span class="value">${contactInfo.email || 'Not provided'}</span></p>
+            <p><span class="label">Organization:</span><span class="value">${contactInfo.organization || 'Not provided'}</span></p>
+            <p><span class="label">Role:</span><span class="value">${contactInfo.role || 'Not provided'}</span></p>
           </div>
           
-          <h2>Feedback Categories</h2>
-          <p>${selectedCategories.length > 0 
-            ? selectedCategories.map(id => FEEDBACK_CATEGORIES.find(c => c.id === id)?.label).join(', ')
-            : 'None selected'}</p>
-          
-          ${feedbackData.skillSuggestions ? `<h2>Skill & Tool Suggestions</h2><pre>${feedbackData.skillSuggestions}</pre>` : ''}
-          ${feedbackData.toolSuggestions ? `<h2>Task & Teaching Suggestions</h2><pre>${feedbackData.toolSuggestions}</pre>` : ''}
-          ${feedbackData.resourceSuggestions ? `<h2>Resource Suggestions</h2><pre>${feedbackData.resourceSuggestions}</pre>` : ''}
-          ${feedbackData.generalComments ? `<h2>General Comments</h2><pre>${feedbackData.generalComments}</pre>` : ''}
+          ${selectedCategories.map(categoryId => {
+            const category = FEEDBACK_CATEGORIES.find(c => c.id === categoryId);
+            const feedback = categoryFeedback[categoryId];
+            if (category && feedback) {
+              return `<h2>${category.icon} ${category.label}</h2><pre>${feedback}</pre>`;
+            }
+            return '';
+          }).join('')}
         </body>
       </html>
     `;
@@ -179,13 +164,16 @@ export function Feedback({ onPrev }: FeedbackProps) {
     });
   };
 
+  const selectedCategoryData = selectedCategories.map(id => 
+    FEEDBACK_CATEGORIES.find(c => c.id === id)!
+  );
+
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-foreground mb-2">Share Your Feedback</h2>
         <p className="text-muted-foreground">
-          Help us improve the WBL Program Planner! Share suggestions for new skills, tools, resources, 
-          or any improvements you'd like to see.
+          Help us improve the WBL Program Planner! Click on a category below to add your suggestions.
         </p>
       </div>
 
@@ -203,8 +191,8 @@ export function Feedback({ onPrev }: FeedbackProps) {
             <Input
               id="name"
               placeholder="Your name"
-              value={feedbackData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
+              value={contactInfo.name}
+              onChange={(e) => handleContactChange('name', e.target.value)}
             />
           </div>
           <div>
@@ -213,8 +201,8 @@ export function Feedback({ onPrev }: FeedbackProps) {
               id="email"
               type="email"
               placeholder="your.email@example.com"
-              value={feedbackData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
+              value={contactInfo.email}
+              onChange={(e) => handleContactChange('email', e.target.value)}
             />
           </div>
           <div>
@@ -222,8 +210,8 @@ export function Feedback({ onPrev }: FeedbackProps) {
             <Input
               id="organization"
               placeholder="School, company, or organization"
-              value={feedbackData.organization}
-              onChange={(e) => handleInputChange('organization', e.target.value)}
+              value={contactInfo.organization}
+              onChange={(e) => handleContactChange('organization', e.target.value)}
             />
           </div>
           <div>
@@ -231,8 +219,8 @@ export function Feedback({ onPrev }: FeedbackProps) {
             <Input
               id="role"
               placeholder="Educator, Counselor, Employer, etc."
-              value={feedbackData.role}
-              onChange={(e) => handleInputChange('role', e.target.value)}
+              value={contactInfo.role}
+              onChange={(e) => handleContactChange('role', e.target.value)}
             />
           </div>
         </CardContent>
@@ -241,8 +229,7 @@ export function Feedback({ onPrev }: FeedbackProps) {
       {/* Feedback Categories */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Lightbulb className="w-5 h-5" />
+          <CardTitle className="text-lg">
             What would you like to give feedback on?
           </CardTitle>
         </CardHeader>
@@ -252,7 +239,7 @@ export function Feedback({ onPrev }: FeedbackProps) {
               <button
                 key={category.id}
                 onClick={() => toggleCategory(category.id)}
-                className={`p-3 rounded-lg border text-left transition-all ${
+                className={`p-3 rounded-lg border-2 text-left transition-all ${
                   selectedCategories.includes(category.id)
                     ? 'border-primary bg-primary/10 ring-1 ring-primary'
                     : 'border-border hover:border-primary/50 bg-card'
@@ -267,86 +254,57 @@ export function Feedback({ onPrev }: FeedbackProps) {
         </CardContent>
       </Card>
 
-      {/* Suggestion Boxes */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Skill & Tool Suggestions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              placeholder="Suggest new skills to add, tools for existing skills, or modifications to current options..."
-              value={feedbackData.skillSuggestions}
-              onChange={(e) => handleInputChange('skillSuggestions', e.target.value)}
-              className="min-h-[120px]"
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Task & Teaching Suggestions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              placeholder="Suggest work experiences, teaching strategies, or assessment methods to add..."
-              value={feedbackData.toolSuggestions}
-              onChange={(e) => handleInputChange('toolSuggestions', e.target.value)}
-              className="min-h-[120px]"
-            />
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <BookOpen className="w-4 h-4" />
-            Resource Suggestions
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            placeholder="Suggest documents, links, videos, or templates that should be added to the resource library..."
-            value={feedbackData.resourceSuggestions}
-            onChange={(e) => handleInputChange('resourceSuggestions', e.target.value)}
-            className="min-h-[100px]"
-          />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <MessageSquare className="w-4 h-4" />
-            General Comments
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            placeholder="Any other feedback, suggestions, or comments about the WBL Program Planner..."
-            value={feedbackData.generalComments}
-            onChange={(e) => handleInputChange('generalComments', e.target.value)}
-            className="min-h-[120px]"
-          />
-        </CardContent>
-      </Card>
+      {/* Dynamic Feedback Boxes */}
+      {selectedCategoryData.length > 0 && (
+        <div className="space-y-4">
+          {selectedCategoryData.map(category => (
+            <Card key={category.id}>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <span>{category.icon}</span>
+                    {category.label}
+                  </CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                    onClick={() => removeCategory(category.id)}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Textarea
+                  placeholder={category.placeholder}
+                  value={categoryFeedback[category.id] || ''}
+                  onChange={(e) => handleFeedbackChange(category.id, e.target.value)}
+                  className="min-h-[120px]"
+                />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Action Buttons */}
-      <Card className="bg-muted/50">
-        <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button onClick={handleDownloadPDF} className="flex-1">
-              <Download className="w-4 h-4 mr-2" />
-              Download as PDF
-            </Button>
-            <Button onClick={handleEmailFeedback} variant="outline" className="flex-1">
-              <Mail className="w-4 h-4 mr-2" />
-              Email to support@explr.cc
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {selectedCategories.length > 0 && (
+        <Card className="bg-muted/50">
+          <CardContent className="pt-6">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button onClick={handleDownloadPDF} className="flex-1">
+                <Download className="w-4 h-4 mr-2" />
+                Download as PDF
+              </Button>
+              <Button onClick={handleEmailFeedback} variant="outline" className="flex-1">
+                <Mail className="w-4 h-4 mr-2" />
+                Email to support@explr.cc
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="flex justify-start pt-4">
         <Button variant="ghost" onClick={onPrev}>
