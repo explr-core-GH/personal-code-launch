@@ -11,6 +11,7 @@ import { TeachingMethods } from '@/components/wbl/steps/TeachingMethods';
 import { MonitorProgress } from '@/components/wbl/steps/MonitorProgress';
 import { Alignment } from '@/components/wbl/steps/Alignment';
 import { Communication } from '@/components/wbl/steps/Communication';
+import { Feedback } from '@/components/wbl/steps/Feedback';
 import { useSkillData } from '@/hooks/useSkillData';
 import { useOrganizationData } from '@/hooks/useOrganizationData';
 
@@ -113,6 +114,13 @@ const Index = () => {
           <Communication
             onViewSummary={() => setShowSummary(true)}
             onPrev={() => goToStep(7)}
+            onNext={() => goToStep(9)}
+          />
+        );
+      case 9:
+        return (
+          <Feedback
+            onPrev={() => goToStep(8)}
           />
         );
       default:
