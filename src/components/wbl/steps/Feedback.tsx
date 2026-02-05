@@ -4,7 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { ChevronLeft, Send, Users, X, Loader2 } from 'lucide-react';
+import { ChevronLeft, Send, Users, X, Loader2, Printer } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -59,6 +59,92 @@ export function Feedback({ onPrev }: FeedbackProps) {
 
   const handleContactChange = (field: string, value: string) => {
     setContactInfo(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleDownloadPDF = () => {
+    const hasFeedback = selectedCategories.some(id => categoryFeedback[id]?.trim());
+    if (!hasFeedback) {
+      toast({
+        title: "No Feedback Entered",
+        description: "Please enter feedback in at least one category to download.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const feedbackHTML = selectedCategories
+      .filter(id => categoryFeedback[id]?.trim())
+      .map(id => {
+        const category = FEEDBACK_CATEGORIES.find(c => c.id === id);
+        return `
+          <div style="margin-bottom: 20px; page-break-inside: avoid;">
+            <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #1e293b;">
+              ${category?.icon} ${category?.label}
+            </h3>
+            <p style="margin: 0; padding: 12px; background: #f1f5f9; border-radius: 6px; color: #475569; white-space: pre-wrap;">
+              ${categoryFeedback[id]}
+            </p>
+          </div>
+        `;
+      }).join('');
+
+    const pdfHTML = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>WBL Program Planner Feedback</title>
+        <style>
+          * { box-sizing: border-box; }
+          body { font-family: 'DM Sans', Arial, sans-serif; color: #1e293b; padding: 30px; margin: 0; }
+          .header { text-align: center; padding-bottom: 20px; border-bottom: 2px solid #bcef28; margin-bottom: 30px; }
+          .header h1 { margin: 0 0 5px 0; font-size: 24px; color: #65a30d; }
+          .header .date { margin: 0; color: #64748b; font-size: 12px; }
+          .contact-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 24px; }
+          .contact-section h2 { margin: 0 0 12px 0; font-size: 14px; color: #334155; }
+          .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; }
+          .contact-grid p { margin: 0; }
+          .label { color: #64748b; }
+          .value { color: #1e293b; }
+          .feedback-section h2 { margin: 0 0 16px 0; font-size: 16px; color: #1e293b; }
+          @media print {
+            body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>WBL Program Planner Feedback</h1>
+          <p class="date">Submitted on ${new Date().toLocaleDateString()}</p>
+        </div>
+        
+        ${(contactInfo.name || contactInfo.email || contactInfo.organization || contactInfo.role) ? `
+        <div class="contact-section">
+          <h2>Contact Information</h2>
+          <div class="contact-grid">
+            ${contactInfo.name ? `<p><span class="label">Name:</span> <span class="value">${contactInfo.name}</span></p>` : ''}
+            ${contactInfo.email ? `<p><span class="label">Email:</span> <span class="value">${contactInfo.email}</span></p>` : ''}
+            ${contactInfo.organization ? `<p><span class="label">Organization:</span> <span class="value">${contactInfo.organization}</span></p>` : ''}
+            ${contactInfo.role ? `<p><span class="label">Role:</span> <span class="value">${contactInfo.role}</span></p>` : ''}
+          </div>
+        </div>
+        ` : ''}
+
+        <div class="feedback-section">
+          <h2>Feedback</h2>
+          ${feedbackHTML}
+        </div>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(pdfHTML);
+    printWindow.document.close();
+    printWindow.onload = () => {
+      printWindow.print();
+    };
   };
 
   const handleSubmitFeedback = async () => {
@@ -259,10 +345,10 @@ export function Feedback({ onPrev }: FeedbackProps) {
         </div>
       )}
 
-      {/* Submit Button */}
+      {/* Submit Buttons */}
       {selectedCategories.length > 0 && (
         <Card className="bg-muted/50">
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 space-y-3">
             <Button 
               onClick={handleSubmitFeedback} 
               className="w-full"
@@ -280,7 +366,16 @@ export function Feedback({ onPrev }: FeedbackProps) {
                 </>
               )}
             </Button>
-            <p className="text-sm text-muted-foreground text-center mt-2">
+            <Button 
+              onClick={handleDownloadPDF} 
+              variant="outline"
+              className="w-full"
+              disabled={isSubmitting}
+            >
+              <Printer className="w-4 h-4 mr-2" />
+              Download as PDF
+            </Button>
+            <p className="text-sm text-muted-foreground text-center">
               Your feedback will be sent directly to our team
             </p>
           </CardContent>
