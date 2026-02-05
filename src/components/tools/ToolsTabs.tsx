@@ -151,7 +151,7 @@ export function ToolsTabs() {
   );
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col">
       {/* Tool Tabs */}
       <div className="px-6 pt-6 pb-4 border-b border-border bg-background flex-shrink-0">
         <div className="flex gap-2">
@@ -180,12 +180,12 @@ export function ToolsTabs() {
 
       {/* Tool Content */}
       {activeTool === 'wbl' ? (
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col">
           <WBLHeader />
           <ProgressOverview completedCount={getCompletedCount()} />
           <StepNavigation currentStep={currentStep} onStepChange={goToStep} />
           
-          <main className="flex-1 overflow-y-auto px-6 py-6">
+          <main className="flex-1 px-6 py-6">
             <div>
               {renderStep()}
             </div>
