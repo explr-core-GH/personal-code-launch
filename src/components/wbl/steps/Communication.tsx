@@ -13,6 +13,7 @@ import { z } from 'zod';
 interface CommunicationProps {
   onViewSummary: () => void;
   onPrev: () => void;
+  onNext: () => void;
 }
 
 const authSchema = z.object({
@@ -20,7 +21,7 @@ const authSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
-export function Communication({ onViewSummary, onPrev }: CommunicationProps) {
+export function Communication({ onViewSummary, onPrev, onNext }: CommunicationProps) {
   const step = STEPS[7];
   const { user, signIn, signUp } = useAuth();
   const { toast } = useToast();
@@ -161,10 +162,15 @@ export function Communication({ onViewSummary, onPrev }: CommunicationProps) {
           <ChevronLeft className="w-4 h-4 mr-2" />
           Previous
         </Button>
-        <Button onClick={onViewSummary} className="bg-accent hover:bg-emerald-hover text-accent-foreground">
-          <Zap className="w-5 h-5 mr-2" />
-          View Summary
-        </Button>
+        <div className="flex gap-3">
+          <Button onClick={onViewSummary} variant="outline">
+            <Zap className="w-5 h-5 mr-2" />
+            View Summary
+          </Button>
+          <Button onClick={onNext} className="bg-accent hover:bg-emerald-hover text-accent-foreground">
+            Next
+          </Button>
+        </div>
       </div>
 
       {/* Auth Modal */}

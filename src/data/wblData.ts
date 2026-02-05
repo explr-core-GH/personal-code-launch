@@ -55,7 +55,8 @@ export const STEPS: Step[] = [
   { id: 5, title: 'Learning Approaches', short: 'Teaching', description: 'Select approaches for student skill development' },
   { id: 6, title: 'Monitor Progress', short: 'Check', description: 'Track and assess student skill development' },
   { id: 7, title: 'OMJ Alignment', short: 'Align', description: 'Align your choices with the OMJ Readiness Seal' },
-  { id: 8, title: 'Communicate', short: 'Share', description: 'Communicate your plan to students and staff' }
+  { id: 8, title: 'Communicate', short: 'Share', description: 'Communicate your plan to students and staff' },
+  { id: 9, title: 'Feedback', short: 'Feedback', description: 'Share suggestions to improve this tool' }
 ];
 
 export const TEACHING_STRATEGIES = [
