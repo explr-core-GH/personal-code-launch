@@ -159,26 +159,28 @@ export function ToolsTabs() {
         </TabsList>
       </div>
 
-      <TabsContent value="wbl" className="flex-1 flex flex-col overflow-hidden mt-0 data-[state=inactive]:hidden">
-        <div className="flex-shrink-0">
-          <WBLHeader />
-          <ProgressOverview completedCount={getCompletedCount()} />
-          <StepNavigation currentStep={currentStep} onStepChange={goToStep} />
-        </div>
-        
-        <div className="flex-1 overflow-auto px-6 py-6">
-          <div className="max-w-6xl mx-auto">
-            {renderStep()}
+      <TabsContent value="wbl" className="flex-1 mt-0 h-full">
+        <div className="h-full flex flex-col">
+          <div className="flex-shrink-0">
+            <WBLHeader />
+            <ProgressOverview completedCount={getCompletedCount()} />
+            <StepNavigation currentStep={currentStep} onStepChange={goToStep} />
           </div>
-        </div>
+          
+          <div className="flex-1 overflow-auto px-6 py-6">
+            <div className="max-w-6xl mx-auto">
+              {renderStep()}
+            </div>
+          </div>
 
-        <SummaryModal
-          isOpen={showSummary}
-          onClose={() => setShowSummary(false)}
-          skillData={skillData}
-          organizationData={organizationData}
-          projectIdea={projectIdea}
-        />
+          <SummaryModal
+            isOpen={showSummary}
+            onClose={() => setShowSummary(false)}
+            skillData={skillData}
+            organizationData={organizationData}
+            projectIdea={projectIdea}
+          />
+        </div>
       </TabsContent>
 
       {comingSoonTools.map((tool) => (
