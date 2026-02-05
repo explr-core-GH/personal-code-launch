@@ -81,6 +81,7 @@ export const COMMUNICATION_ITEMS = [
   { icon: '📋', title: 'Expectations', description: 'Share workplace rules, dress code, and behavior standards' },
   { icon: '🛠️', title: 'Tools Being Used', description: 'Explain the tools and systems students will work with' },
   { icon: '🎯', title: 'Skill Goals', description: 'Outline which skills students will develop' },
+  { icon: '📚', title: 'Skills & Projects', description: 'Teach and share the skills, lessons, and potential projects interns will work on' },
   { icon: '💬', title: 'Feedback Process', description: 'Explain how and when feedback will be provided' },
   { icon: '🏆', title: 'Success Criteria', description: 'Define what success looks like for this internship' }
 ];
