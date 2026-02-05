@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Wrench, GraduationCap, Users, BarChart3 } from 'lucide-react';
 import { WBLHeader } from '@/components/wbl/WBLHeader';
 import { ProgressOverview } from '@/components/wbl/ProgressOverview';
@@ -16,14 +15,19 @@ import { Communication } from '@/components/wbl/steps/Communication';
 import { Feedback } from '@/components/wbl/steps/Feedback';
 import { useSkillData } from '@/hooks/useSkillData';
 import { useOrganizationData } from '@/hooks/useOrganizationData';
+import { cn } from '@/lib/utils';
 
-const comingSoonTools = [
-  { id: 'pathways', label: 'Pathways Explorer', icon: GraduationCap },
-  { id: 'mentorship', label: 'Mentorship', icon: Users },
-  { id: 'analytics', label: 'Program Analytics', icon: BarChart3 },
+type ToolId = 'wbl' | 'pathways' | 'mentorship' | 'analytics';
+
+const tools = [
+  { id: 'wbl' as ToolId, label: 'WBL Planner', icon: Wrench, comingSoon: false },
+  { id: 'pathways' as ToolId, label: 'Pathways Explorer', icon: GraduationCap, comingSoon: true },
+  { id: 'mentorship' as ToolId, label: 'Mentorship', icon: Users, comingSoon: true },
+  { id: 'analytics' as ToolId, label: 'Program Analytics', icon: BarChart3, comingSoon: true },
 ];
 
 export function ToolsTabs() {
+  const [activeTool, setActiveTool] = useState<ToolId>('wbl');
   const [currentStep, setCurrentStep] = useState(1);
   const [showSummary, setShowSummary] = useState(false);
   const [projectIdea, setProjectIdea] = useState('');
@@ -132,46 +136,60 @@ export function ToolsTabs() {
     }
   };
 
+  const renderComingSoon = (tool: typeof tools[number]) => (
+    <div className="flex-1 flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center">
+          <tool.icon className="w-8 h-8 text-muted-foreground" />
+        </div>
+        <div>
+          <h2 className="text-xl font-semibold text-foreground">{tool.label}</h2>
+          <p className="text-muted-foreground mt-1">Coming Soon</p>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <Tabs defaultValue="wbl" className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Tool Tabs */}
       <div className="px-6 pt-4 border-b border-border bg-background flex-shrink-0">
-        <TabsList className="h-auto p-1 bg-muted/50 rounded-lg">
-          <TabsTrigger 
-            value="wbl" 
-            className="flex items-center gap-2 px-4 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
-          >
-            <Wrench className="w-4 h-4" />
-            <span>WBL Planner</span>
-          </TabsTrigger>
-          {comingSoonTools.map((tool) => (
-            <TabsTrigger
+        <div className="inline-flex h-auto p-1 bg-muted/50 rounded-lg">
+          {tools.map((tool) => (
+            <button
               key={tool.id}
-              value={tool.id}
-              className="flex items-center gap-2 px-4 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              onClick={() => setActiveTool(tool.id)}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all",
+                activeTool === tool.id
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
             >
               <tool.icon className="w-4 h-4" />
               <span>{tool.label}</span>
-              <span className="ml-1 text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">
-                Soon
-              </span>
-            </TabsTrigger>
+              {tool.comingSoon && (
+                <span className="ml-1 text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                  Soon
+                </span>
+              )}
+            </button>
           ))}
-        </TabsList>
+        </div>
       </div>
 
-      <TabsContent value="wbl" className="flex-1 mt-0 overflow-hidden">
-        <div className="h-full flex flex-col overflow-hidden">
-          <div className="flex-shrink-0">
-            <WBLHeader />
-            <ProgressOverview completedCount={getCompletedCount()} />
-            <StepNavigation currentStep={currentStep} onStepChange={goToStep} />
-          </div>
+      {/* Tool Content */}
+      {activeTool === 'wbl' ? (
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <WBLHeader />
+          <ProgressOverview completedCount={getCompletedCount()} />
+          <StepNavigation currentStep={currentStep} onStepChange={goToStep} />
           
-          <div className="flex-1 px-6 py-4 overflow-hidden">
-            <div className="max-w-6xl mx-auto h-full">
+          <main className="flex-1 overflow-y-auto px-6 py-6">
+            <div className="max-w-6xl mx-auto">
               {renderStep()}
             </div>
-          </div>
+          </main>
 
           <SummaryModal
             isOpen={showSummary}
@@ -181,25 +199,9 @@ export function ToolsTabs() {
             projectIdea={projectIdea}
           />
         </div>
-      </TabsContent>
-
-      {comingSoonTools.map((tool) => (
-        <TabsContent 
-          key={tool.id} 
-          value={tool.id} 
-          className="flex-1 flex items-center justify-center mt-0"
-        >
-          <div className="text-center space-y-4">
-            <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center">
-              <tool.icon className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold text-foreground">{tool.label}</h2>
-              <p className="text-muted-foreground mt-1">Coming Soon</p>
-            </div>
-          </div>
-        </TabsContent>
-      ))}
-    </Tabs>
+      ) : (
+        renderComingSoon(tools.find(t => t.id === activeTool)!)
+      )}
+    </div>
   );
 }
