@@ -159,16 +159,16 @@ export function ToolsTabs() {
         </TabsList>
       </div>
 
-      <TabsContent value="wbl" className="flex-1 mt-0 h-full">
-        <div className="h-full flex flex-col">
+      <TabsContent value="wbl" className="flex-1 mt-0 overflow-hidden">
+        <div className="h-full flex flex-col overflow-hidden">
           <div className="flex-shrink-0">
             <WBLHeader />
             <ProgressOverview completedCount={getCompletedCount()} />
             <StepNavigation currentStep={currentStep} onStepChange={goToStep} />
           </div>
           
-          <div className="flex-1 overflow-auto px-6 py-6">
-            <div className="max-w-6xl mx-auto">
+          <div className="flex-1 px-6 py-4 overflow-hidden">
+            <div className="max-w-6xl mx-auto h-full">
               {renderStep()}
             </div>
           </div>
