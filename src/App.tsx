@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Resources from "./pages/Resources";
+import ProgramProfileBuilder from "./pages/ProgramProfileBuilder";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -23,6 +24,11 @@ const App = () => (
           <Route path="/resources" element={
             <ProtectedRoute>
               <Resources />
+            </ProtectedRoute>
+          } />
+          <Route path="/program-profiles" element={
+            <ProtectedRoute>
+              <ProgramProfileBuilder />
             </ProtectedRoute>
           } />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
