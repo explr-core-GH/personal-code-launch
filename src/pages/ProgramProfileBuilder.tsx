@@ -492,7 +492,26 @@ function exportToPrintableTab(profile, skills) {
       <h3><span class="h-icon">${renderIconSvg("Package", 16)}</span>Consumables</h3>
       <ul class="resource-list">${resourceList(profile.consumables)}</ul>
     </div>
+    <div class="resource-col">
+      <h3><span class="h-icon">${renderIconSvg("Users", 16)}</span>Staffing</h3>
+      <ul class="resource-list">${resourceList(profile.staffing)}</ul>
+    </div>
   </section>
+  ${profile.location ? `<section class="resources" style="grid-template-columns: 1fr 1fr; margin-top: 0.18in;">
+    <div class="resource-col">
+      <h3><span class="h-icon">${renderIconSvg("Compass", 16)}</span>Location</h3>
+      <div style="font-size:11px;line-height:1.55;color:#475569;">${esc(profile.location)}</div>
+    </div>
+    ${profile.otherInfo ? `<div class="resource-col">
+      <h3><span class="h-icon">${renderIconSvg("BookOpen", 16)}</span>Other Information</h3>
+      <div style="font-size:11px;line-height:1.55;color:#475569;">${esc(profile.otherInfo)}</div>
+    </div>` : ""}
+  </section>` : (profile.otherInfo ? `<section class="resources" style="grid-template-columns: 1fr; margin-top: 0.18in;">
+    <div class="resource-col">
+      <h3><span class="h-icon">${renderIconSvg("BookOpen", 16)}</span>Other Information</h3>
+      <div style="font-size:11px;line-height:1.55;color:#475569;">${esc(profile.otherInfo)}</div>
+    </div>
+  </section>` : "")}
   <footer class="page-footer">
     <div class="brand">${esc(profile.footerLeft)}</div>
     <div>${esc(profile.footerRight)}</div>
