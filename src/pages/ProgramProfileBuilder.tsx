@@ -1124,6 +1124,26 @@ function ResourceCol({ title, iconKey, items }) {
   );
 }
 
+function TextBlock({ title, iconKey, body }) {
+  return (
+    <div style={{ borderTop: "2px solid #1a2332", paddingTop: 10 }}>
+      <h3 style={{
+        fontSize: 11, textTransform: "uppercase", letterSpacing: "0.16em",
+        fontWeight: 800, color: "#1a2332", margin: "0 0 8px 0",
+        display: "flex", alignItems: "center", gap: 8,
+      }}>
+        <span style={{ display: "inline-flex", width: 20, height: 20, alignItems: "center", justifyContent: "center", color: "#00694e" }}>
+          <SkillIcon iconKey={iconKey} size={16} />
+        </span>
+        {title}
+      </h3>
+      <div style={{ fontSize: 11.5, color: "#475569", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
+        {body}
+      </div>
+    </div>
+  );
+}
+
 function ListEditor({ items, onChange, placeholder }) {
   const [draft, setDraft] = useState("");
   function add() {
