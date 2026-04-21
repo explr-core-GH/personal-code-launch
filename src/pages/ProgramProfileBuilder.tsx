@@ -69,10 +69,24 @@ function loadIndex() {
 function saveIndex(idx) {
   localStorage.setItem(INDEX_KEY, JSON.stringify(idx));
 }
+function migrateProfile(p) {
+  if (!p) return p;
+  return {
+    ...p,
+    skills: Array.isArray(p.skills) ? p.skills : [],
+    customSkills: Array.isArray(p.customSkills) ? p.customSkills : [],
+    equipment: Array.isArray(p.equipment) ? p.equipment : [],
+    software: Array.isArray(p.software) ? p.software : [],
+    consumables: Array.isArray(p.consumables) ? p.consumables : [],
+    staffing: Array.isArray(p.staffing) ? p.staffing : [],
+    location: typeof p.location === "string" ? p.location : "",
+    otherInfo: typeof p.otherInfo === "string" ? p.otherInfo : "",
+  };
+}
 function loadProfile(id) {
   try {
     const raw = localStorage.getItem(STORAGE_PREFIX + id);
-    return raw ? JSON.parse(raw) : null;
+    return raw ? migrateProfile(JSON.parse(raw)) : null;
   } catch { return null; }
 }
 function saveProfile(profile) {
