@@ -101,6 +101,9 @@ function newProfile() {
     equipment: ["Laptops or Chromebooks", "3D printer & filament", "Safety glasses"],
     software: ["Tinkercad", "Google Workspace", "Canva for presentations"],
     consumables: ["PLA filament", "Cardstock", "Markers & tape"],
+    staffing: ["1 Lead Instructor", "1 Assistant Instructor", "Volunteer mentors as needed"],
+    location: "",
+    otherInfo: "",
     footerLeft: "Program Profile",
     footerRight: "Contact: name@organization.org · website.org",
   };
@@ -489,7 +492,26 @@ function exportToPrintableTab(profile, skills) {
       <h3><span class="h-icon">${renderIconSvg("Package", 16)}</span>Consumables</h3>
       <ul class="resource-list">${resourceList(profile.consumables)}</ul>
     </div>
+    <div class="resource-col">
+      <h3><span class="h-icon">${renderIconSvg("Users", 16)}</span>Staffing</h3>
+      <ul class="resource-list">${resourceList(profile.staffing)}</ul>
+    </div>
   </section>
+  ${profile.location ? `<section class="resources" style="grid-template-columns: 1fr 1fr; margin-top: 0.18in;">
+    <div class="resource-col">
+      <h3><span class="h-icon">${renderIconSvg("Compass", 16)}</span>Location</h3>
+      <div style="font-size:11px;line-height:1.55;color:#475569;">${esc(profile.location)}</div>
+    </div>
+    ${profile.otherInfo ? `<div class="resource-col">
+      <h3><span class="h-icon">${renderIconSvg("BookOpen", 16)}</span>Other Information</h3>
+      <div style="font-size:11px;line-height:1.55;color:#475569;">${esc(profile.otherInfo)}</div>
+    </div>` : ""}
+  </section>` : (profile.otherInfo ? `<section class="resources" style="grid-template-columns: 1fr; margin-top: 0.18in;">
+    <div class="resource-col">
+      <h3><span class="h-icon">${renderIconSvg("BookOpen", 16)}</span>Other Information</h3>
+      <div style="font-size:11px;line-height:1.55;color:#475569;">${esc(profile.otherInfo)}</div>
+    </div>
+  </section>` : "")}
   <footer class="page-footer">
     <div class="brand">${esc(profile.footerLeft)}</div>
     <div>${esc(profile.footerRight)}</div>
@@ -804,6 +826,23 @@ function Editor({ profile, onChange, onSave, onBack }) {
           <Section title="Equipment"><ListEditor items={profile.equipment} onChange={items => update({ equipment: items })} placeholder="Add equipment..." /></Section>
           <Section title="Software"><ListEditor items={profile.software} onChange={items => update({ software: items })} placeholder="Add software..." /></Section>
           <Section title="Consumables"><ListEditor items={profile.consumables} onChange={items => update({ consumables: items })} placeholder="Add consumable..." /></Section>
+          <Section title="Staffing"><ListEditor items={profile.staffing} onChange={items => update({ staffing: items })} placeholder="Add staffing role..." /></Section>
+          <Section title="Location">
+            <textarea
+              value={profile.location}
+              onChange={e => update({ location: e.target.value })}
+              placeholder="e.g. CSU Engineering Building, Room 204, Fort Collins, CO"
+              style={{ ...inputStyle, minHeight: 70, resize: "vertical", fontFamily: "inherit" } as React.CSSProperties}
+            />
+          </Section>
+          <Section title="Other Information">
+            <textarea
+              value={profile.otherInfo}
+              onChange={e => update({ otherInfo: e.target.value })}
+              placeholder="Anything else parents/students should know (transportation, meals, prerequisites, etc.)"
+              style={{ ...inputStyle, minHeight: 90, resize: "vertical", fontFamily: "inherit" } as React.CSSProperties}
+            />
+          </Section>
 
           <Section title="Footer">
             <Field label="Left text"><input value={profile.footerLeft} onChange={e => update({ footerLeft: e.target.value })} style={inputStyle} /></Field>
@@ -1008,11 +1047,24 @@ function ProfilePreview({ profile, skills }) {
         )}
       </section>
 
-      <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.22in", marginTop: "0.05in" }}>
+      <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "0.18in", marginTop: "0.05in" }}>
         <ResourceCol title="Equipment" iconKey="Wrench" items={profile.equipment} />
         <ResourceCol title="Software" iconKey="Monitor" items={profile.software} />
         <ResourceCol title="Consumables" iconKey="Package" items={profile.consumables} />
+        <ResourceCol title="Staffing" iconKey="Users" items={profile.staffing} />
       </section>
+
+      {(profile.location || profile.otherInfo) && (
+        <section style={{
+          display: "grid",
+          gridTemplateColumns: profile.location && profile.otherInfo ? "1fr 1fr" : "1fr",
+          gap: "0.22in",
+          marginTop: "0.05in",
+        }}>
+          {profile.location && <TextBlock title="Location" iconKey="Compass" body={profile.location} />}
+          {profile.otherInfo && <TextBlock title="Other Information" iconKey="BookOpen" body={profile.otherInfo} />}
+        </section>
+      )}
 
       <footer style={{
         marginTop: "auto", paddingTop: 10, borderTop: "1px solid #e2e8f0",
@@ -1068,6 +1120,26 @@ function ResourceCol({ title, iconKey, items }) {
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+function TextBlock({ title, iconKey, body }) {
+  return (
+    <div style={{ borderTop: "2px solid #1a2332", paddingTop: 10 }}>
+      <h3 style={{
+        fontSize: 11, textTransform: "uppercase", letterSpacing: "0.16em",
+        fontWeight: 800, color: "#1a2332", margin: "0 0 8px 0",
+        display: "flex", alignItems: "center", gap: 8,
+      }}>
+        <span style={{ display: "inline-flex", width: 20, height: 20, alignItems: "center", justifyContent: "center", color: "#00694e" }}>
+          <SkillIcon iconKey={iconKey} size={16} />
+        </span>
+        {title}
+      </h3>
+      <div style={{ fontSize: 11.5, color: "#475569", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
+        {body}
+      </div>
     </div>
   );
 }
