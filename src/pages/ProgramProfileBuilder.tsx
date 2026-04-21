@@ -1047,11 +1047,24 @@ function ProfilePreview({ profile, skills }) {
         )}
       </section>
 
-      <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.22in", marginTop: "0.05in" }}>
+      <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "0.18in", marginTop: "0.05in" }}>
         <ResourceCol title="Equipment" iconKey="Wrench" items={profile.equipment} />
         <ResourceCol title="Software" iconKey="Monitor" items={profile.software} />
         <ResourceCol title="Consumables" iconKey="Package" items={profile.consumables} />
+        <ResourceCol title="Staffing" iconKey="Users" items={profile.staffing} />
       </section>
+
+      {(profile.location || profile.otherInfo) && (
+        <section style={{
+          display: "grid",
+          gridTemplateColumns: profile.location && profile.otherInfo ? "1fr 1fr" : "1fr",
+          gap: "0.22in",
+          marginTop: "0.05in",
+        }}>
+          {profile.location && <TextBlock title="Location" iconKey="Compass" body={profile.location} />}
+          {profile.otherInfo && <TextBlock title="Other Information" iconKey="BookOpen" body={profile.otherInfo} />}
+        </section>
+      )}
 
       <footer style={{
         marginTop: "auto", paddingTop: 10, borderTop: "1px solid #e2e8f0",
