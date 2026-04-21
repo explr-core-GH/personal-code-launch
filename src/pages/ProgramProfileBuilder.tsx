@@ -423,45 +423,99 @@ function exportToPrintableTab(profile, skills) {
 <meta charset="UTF-8">
 <title>${esc(profile.title)} — Program Profile</title>
 <style>
+  :root {
+    --fit: 1;
+    --page-width: 8.5in;
+    --page-height: 10.9in;
+    --page-pad-y: calc(0.4in * var(--fit));
+    --page-pad-x: calc(0.45in * var(--fit));
+    --page-gap: calc(0.22in * var(--fit));
+    --hero-logo: calc(1.55in * var(--fit));
+    --hero-gap: calc(0.25in * var(--fit));
+    --hero-border: calc(3px * var(--fit));
+    --hero-padding: calc(0.18in * var(--fit));
+    --eyebrow-text: calc(10px * var(--fit));
+    --title-text: calc(32px * var(--fit));
+    --tagline-text: calc(14px * var(--fit));
+    --meta-gap: calc(16px * var(--fit));
+    --meta-label-text: calc(10px * var(--fit));
+    --meta-value-text: calc(12px * var(--fit));
+    --description-text: calc(13px * var(--fit));
+    --description-pad-left: calc(14px * var(--fit));
+    --section-title-text: calc(11px * var(--fit));
+    --section-title-gap: calc(10px * var(--fit));
+    --section-title-rule: calc(18px * var(--fit));
+    --section-bottom-gap: calc(10px * var(--fit));
+    --skills-gap: calc(10px * var(--fit));
+    --skill-pad-y: calc(12px * var(--fit));
+    --skill-pad-x: calc(10px * var(--fit));
+    --skill-gap: calc(6px * var(--fit));
+    --skill-radius: calc(10px * var(--fit));
+    --skill-icon-box: calc(38px * var(--fit));
+    --skill-icon-radius: calc(9px * var(--fit));
+    --skill-icon-size: calc(22px * var(--fit));
+    --skill-name-text: calc(12px * var(--fit));
+    --skill-desc-text: calc(10px * var(--fit));
+    --resources-gap: calc(0.22in * var(--fit));
+    --resource-top-gap: calc(0.05in * var(--fit));
+    --resource-pad-top: calc(10px * var(--fit));
+    --resource-title-text: calc(11px * var(--fit));
+    --resource-title-gap: calc(8px * var(--fit));
+    --resource-icon-box: calc(20px * var(--fit));
+    --resource-icon-size: calc(16px * var(--fit));
+    --resource-list-gap: calc(4px * var(--fit));
+    --resource-item-text: calc(11.5px * var(--fit));
+    --resource-item-pad-y: calc(3px * var(--fit));
+    --resource-item-pad-left: calc(14px * var(--fit));
+    --resource-bullet-top: calc(10px * var(--fit));
+    --resource-bullet-width: calc(6px * var(--fit));
+    --footer-pad-top: calc(10px * var(--fit));
+    --footer-text: calc(9px * var(--fit));
+    --info-text: calc(11px * var(--fit));
+  }
   *, *::before, *::after { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: #1a2332; background: #eef2f6; }
   .toolbar { position: sticky; top: 0; background: white; border-bottom: 1px solid #e2e8f0; padding: 12px 20px; display: flex; gap: 10px; justify-content: flex-end; z-index: 10; }
   .toolbar button { background: #00694e; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; font-family: inherit; }
   .toolbar button:hover { background: #005538; }
   .toolbar .hint { margin-right: auto; align-self: center; font-size: 12px; color: #64748b; }
-  .page { width: 8.5in; min-height: 11in; background: white; padding: 0.5in 0.6in; margin: 24px auto; box-shadow: 0 4px 24px rgba(15,23,42,0.08); display: flex; flex-direction: column; gap: 0.22in; }
-  header.hero { display: grid; grid-template-columns: 1.55in 1fr; gap: 0.25in; border-bottom: 3px solid #1a2332; padding-bottom: 0.18in; }
-  .logo-box { width: 1.55in; height: 1.55in; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; ${profile.logoDataUrl ? "background:white;border:1px solid #e2e8f0;" : "background:#f8fafc;border:2px dashed #e2e8f0;"} }
-  .hero-text { display: flex; flex-direction: column; justify-content: center; gap: 4px; }
-  .eyebrow { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: #00694e; font-weight: 700; }
-  h1.program-title { font-size: 32px; line-height: 1.05; margin: 0; font-weight: 800; letter-spacing: -0.015em; }
-  .tagline { font-size: 14px; color: #475569; font-style: italic; line-height: 1.4; margin-top: 4px; }
-  .meta-row { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 8px; font-size: 11px; color: #64748b; }
-  .meta-item { display: flex; align-items: center; gap: 6px; }
-  .meta-item strong { color: #1a2332; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; font-size: 10px; }
-  .meta-item span { color: #475569; font-size: 12px; }
-  .dot { width: 3px; height: 3px; border-radius: 50%; background: #e2e8f0; }
-  .description { font-size: 13px; line-height: 1.55; color: #475569; border-left: 4px solid #00694e; padding: 2px 0 2px 14px; }
-  .section-title { display: flex; align-items: center; gap: 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; font-weight: 800; color: #1a2332; margin: 0 0 10px 0; }
-  .section-title::before { content: ""; display: inline-block; width: 18px; height: 2px; background: #00694e; }
-  .skill-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; background: white; }
-  .skill-icon { width: 38px; height: 38px; border-radius: 9px; background: #e8f3ef; color: #00694e; display: flex; align-items: center; justify-content: center; }
-  .skill-name { font-size: 12px; font-weight: 700; color: #1a2332; line-height: 1.25; }
-  .skill-desc { font-size: 10px; color: #64748b; line-height: 1.35; }
-  .resources { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.22in; margin-top: 0.05in; }
-  .resource-col { border-top: 2px solid #1a2332; padding-top: 10px; }
-  .resource-col h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; font-weight: 800; color: #1a2332; margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px; }
-  .resource-col h3 .h-icon { display: inline-flex; width: 20px; height: 20px; align-items: center; justify-content: center; color: #00694e; }
-  .resource-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
-  .resource-list li { font-size: 11.5px; color: #475569; line-height: 1.4; padding: 3px 0 3px 14px; position: relative; }
-  .resource-list li::before { content: ""; position: absolute; left: 0; top: 10px; width: 6px; height: 2px; background: #00694e; }
-  footer.page-footer { margin-top: auto; padding-top: 10px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-size: 9px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase; }
+  .page { width: var(--page-width); min-height: var(--page-height); background: white; padding: var(--page-pad-y) var(--page-pad-x); margin: 24px auto; box-shadow: 0 4px 24px rgba(15,23,42,0.08); display: flex; flex-direction: column; gap: var(--page-gap); }
+  header.hero { display: grid; grid-template-columns: var(--hero-logo) 1fr; gap: var(--hero-gap); border-bottom: var(--hero-border) solid #1a2332; padding-bottom: var(--hero-padding); }
+  .logo-box { width: var(--hero-logo); height: var(--hero-logo); border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; ${profile.logoDataUrl ? "background:white;border:1px solid #e2e8f0;" : "background:#f8fafc;border:2px dashed #e2e8f0;"} }
+  .hero-text { display: flex; flex-direction: column; justify-content: center; gap: calc(4px * var(--fit)); }
+  .eyebrow { font-size: var(--eyebrow-text); letter-spacing: 0.22em; text-transform: uppercase; color: #00694e; font-weight: 700; }
+  h1.program-title { font-size: var(--title-text); line-height: 1.05; margin: 0; font-weight: 800; letter-spacing: -0.015em; }
+  .tagline { font-size: var(--tagline-text); color: #475569; font-style: italic; line-height: 1.4; margin-top: calc(4px * var(--fit)); }
+  .meta-row { display: flex; flex-wrap: wrap; gap: var(--meta-gap); margin-top: calc(8px * var(--fit)); font-size: calc(11px * var(--fit)); color: #64748b; }
+  .meta-item { display: flex; align-items: center; gap: calc(6px * var(--fit)); }
+  .meta-item strong { color: #1a2332; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; font-size: var(--meta-label-text); }
+  .meta-item span { color: #475569; font-size: var(--meta-value-text); }
+  .dot { width: calc(3px * var(--fit)); height: calc(3px * var(--fit)); border-radius: 50%; background: #e2e8f0; }
+  .description { font-size: var(--description-text); line-height: 1.55; color: #475569; border-left: calc(4px * var(--fit)) solid #00694e; padding: calc(2px * var(--fit)) 0 calc(2px * var(--fit)) var(--description-pad-left); }
+  .section-title { display: flex; align-items: center; gap: var(--section-title-gap); font-size: var(--section-title-text); text-transform: uppercase; letter-spacing: 0.18em; font-weight: 800; color: #1a2332; margin: 0 0 var(--section-bottom-gap) 0; }
+  .section-title::before { content: ""; display: inline-block; width: var(--section-title-rule); height: calc(2px * var(--fit)); background: #00694e; }
+  .skills-grid { display: grid; grid-template-columns: repeat(${cols}, 1fr); gap: var(--skills-gap) !important; }
+  .skill-card { border: 1px solid #e2e8f0; border-radius: var(--skill-radius); padding: var(--skill-pad-y) var(--skill-pad-x); display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--skill-gap); background: white; }
+  .skill-icon { width: var(--skill-icon-box); height: var(--skill-icon-box); border-radius: var(--skill-icon-radius); background: #e8f3ef; color: #00694e; display: flex; align-items: center; justify-content: center; }
+  .skill-icon svg { width: var(--skill-icon-size); height: var(--skill-icon-size); }
+  .skill-name { font-size: var(--skill-name-text); font-weight: 700; color: #1a2332; line-height: 1.25; }
+  .skill-desc { font-size: var(--skill-desc-text); color: #64748b; line-height: 1.35; }
+  .resources { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: var(--resources-gap); margin-top: var(--resource-top-gap); }
+  .resource-col { border-top: 2px solid #1a2332; padding-top: var(--resource-pad-top); min-width: 0; }
+  .resource-col h3 { font-size: var(--resource-title-text); text-transform: uppercase; letter-spacing: 0.16em; font-weight: 800; color: #1a2332; margin: 0 0 calc(8px * var(--fit)) 0; display: flex; align-items: center; gap: var(--resource-title-gap); }
+  .resource-col h3 .h-icon { display: inline-flex; width: var(--resource-icon-box); height: var(--resource-icon-box); align-items: center; justify-content: center; color: #00694e; flex-shrink: 0; }
+  .resource-col h3 .h-icon svg { width: var(--resource-icon-size); height: var(--resource-icon-size); }
+  .resource-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--resource-list-gap); }
+  .resource-list li { font-size: var(--resource-item-text); color: #475569; line-height: 1.4; padding: var(--resource-item-pad-y) 0 var(--resource-item-pad-y) var(--resource-item-pad-left); position: relative; }
+  .resource-list li::before { content: ""; position: absolute; left: 0; top: var(--resource-bullet-top); width: var(--resource-bullet-width); height: calc(2px * var(--fit)); background: #00694e; }
+  .info-copy { font-size: var(--info-text) !important; line-height: 1.55; color: #475569; }
+  footer.page-footer { margin-top: auto; padding-top: var(--footer-pad-top); border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-size: var(--footer-text); color: #64748b; letter-spacing: 0.08em; text-transform: uppercase; gap: calc(12px * var(--fit)); }
   footer .brand { font-weight: 800; color: #1a2332; letter-spacing: 0.12em; }
   @media print {
     @page { size: letter portrait; margin: 0; }
     html, body { background: white !important; margin: 0 !important; padding: 0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .toolbar { display: none !important; }
-    .page { box-shadow: none !important; margin: 0 !important; width: 8.5in !important; min-height: 10.9in !important; max-height: 10.9in !important; padding: 0.4in 0.45in !important; overflow: hidden; page-break-after: avoid; }
+    .page { box-shadow: none !important; margin: 0 !important; width: var(--page-width) !important; min-height: var(--page-height) !important; max-height: var(--page-height) !important; overflow: hidden; page-break-after: avoid; }
   }
 </style>
 </head>
@@ -488,7 +542,9 @@ function exportToPrintableTab(profile, skills) {
       </div>
     </div>
   </header>
-  <section class="description">${esc(profile.description)}</section>
+  <section>
+    <div class="description">${esc(profile.description)}</div>
+  </section>
   <section>
     <h2 class="section-title">Skills Students Develop</h2>
     ${skillsHtml}
@@ -514,16 +570,16 @@ function exportToPrintableTab(profile, skills) {
   ${profile.location ? `<section class="resources" style="grid-template-columns: 1fr 1fr; margin-top: 0.18in;">
     <div class="resource-col">
       <h3><span class="h-icon">${renderIconSvg("Compass", 16)}</span>Location</h3>
-      <div style="font-size:11px;line-height:1.55;color:#475569;">${esc(profile.location)}</div>
+      <div class="info-copy">${esc(profile.location)}</div>
     </div>
     ${profile.otherInfo ? `<div class="resource-col">
       <h3><span class="h-icon">${renderIconSvg("BookOpen", 16)}</span>Other Information</h3>
-      <div style="font-size:11px;line-height:1.55;color:#475569;">${esc(profile.otherInfo)}</div>
+      <div class="info-copy">${esc(profile.otherInfo)}</div>
     </div>` : ""}
   </section>` : (profile.otherInfo ? `<section class="resources" style="grid-template-columns: 1fr; margin-top: 0.18in;">
     <div class="resource-col">
       <h3><span class="h-icon">${renderIconSvg("BookOpen", 16)}</span>Other Information</h3>
-      <div style="font-size:11px;line-height:1.55;color:#475569;">${esc(profile.otherInfo)}</div>
+      <div class="info-copy">${esc(profile.otherInfo)}</div>
     </div>
   </section>` : "")}
   <footer class="page-footer">
@@ -531,6 +587,69 @@ function exportToPrintableTab(profile, skills) {
     <div>${esc(profile.footerRight)}</div>
   </footer>
 </div>
+<script>
+(function () {
+  var MIN_FIT = 0.76;
+  var STEP = 0.02;
+
+  function getPage() {
+    return document.querySelector('.page');
+  }
+
+  function measureCssInches() {
+    var probe = document.createElement('div');
+    probe.style.position = 'absolute';
+    probe.style.visibility = 'hidden';
+    probe.style.width = '1in';
+    probe.style.height = '1in';
+    probe.style.pointerEvents = 'none';
+    document.body.appendChild(probe);
+    var rect = probe.getBoundingClientRect();
+    probe.remove();
+    return { width: rect.width || 96, height: rect.height || 96 };
+  }
+
+  function setFit(value) {
+    document.documentElement.style.setProperty('--fit', String(value));
+  }
+
+  function fitPage() {
+    var page = getPage();
+    if (!page) return;
+
+    var inch = measureCssInches();
+    var targetHeight = inch.height * 10.9;
+    var fit = 1;
+    setFit(fit);
+
+    for (var i = 0; i < 14; i += 1) {
+      var currentHeight = page.getBoundingClientRect().height;
+      if (currentHeight <= targetHeight + 1) break;
+      fit = Math.max(MIN_FIT, Number((fit - STEP).toFixed(2)));
+      setFit(fit);
+      if (fit === MIN_FIT) break;
+    }
+
+    page.setAttribute('data-fit', String(fit));
+  }
+
+  function scheduleFit() {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(fitPage);
+    });
+  }
+
+  window.addEventListener('load', scheduleFit);
+  window.addEventListener('resize', scheduleFit);
+  window.addEventListener('beforeprint', fitPage);
+
+  Array.prototype.forEach.call(document.images, function (img) {
+    if (!img.complete) img.addEventListener('load', scheduleFit, { once: true });
+  });
+
+  scheduleFit();
+})();
+</script>
 </body>
 </html>`;
 
