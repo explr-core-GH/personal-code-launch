@@ -826,6 +826,23 @@ function Editor({ profile, onChange, onSave, onBack }) {
           <Section title="Equipment"><ListEditor items={profile.equipment} onChange={items => update({ equipment: items })} placeholder="Add equipment..." /></Section>
           <Section title="Software"><ListEditor items={profile.software} onChange={items => update({ software: items })} placeholder="Add software..." /></Section>
           <Section title="Consumables"><ListEditor items={profile.consumables} onChange={items => update({ consumables: items })} placeholder="Add consumable..." /></Section>
+          <Section title="Staffing"><ListEditor items={profile.staffing} onChange={items => update({ staffing: items })} placeholder="Add staffing role..." /></Section>
+          <Section title="Location">
+            <textarea
+              value={profile.location}
+              onChange={e => update({ location: e.target.value })}
+              placeholder="e.g. CSU Engineering Building, Room 204, Fort Collins, CO"
+              style={{ ...inputStyle, minHeight: 70, resize: "vertical", fontFamily: "inherit" } as React.CSSProperties}
+            />
+          </Section>
+          <Section title="Other Information">
+            <textarea
+              value={profile.otherInfo}
+              onChange={e => update({ otherInfo: e.target.value })}
+              placeholder="Anything else parents/students should know (transportation, meals, prerequisites, etc.)"
+              style={{ ...inputStyle, minHeight: 90, resize: "vertical", fontFamily: "inherit" } as React.CSSProperties}
+            />
+          </Section>
 
           <Section title="Footer">
             <Field label="Left text"><input value={profile.footerLeft} onChange={e => update({ footerLeft: e.target.value })} style={inputStyle} /></Field>
