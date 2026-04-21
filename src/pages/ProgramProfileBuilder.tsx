@@ -101,6 +101,9 @@ function newProfile() {
     equipment: ["Laptops or Chromebooks", "3D printer & filament", "Safety glasses"],
     software: ["Tinkercad", "Google Workspace", "Canva for presentations"],
     consumables: ["PLA filament", "Cardstock", "Markers & tape"],
+    staffing: ["1 Lead Instructor", "1 Assistant Instructor", "Volunteer mentors as needed"],
+    location: "",
+    otherInfo: "",
     footerLeft: "Program Profile",
     footerRight: "Contact: name@organization.org · website.org",
   };
