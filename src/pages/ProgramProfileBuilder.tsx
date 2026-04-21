@@ -458,10 +458,10 @@ function exportToPrintableTab(profile, skills) {
   footer.page-footer { margin-top: auto; padding-top: 10px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-size: 9px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase; }
   footer .brand { font-weight: 800; color: #1a2332; letter-spacing: 0.12em; }
   @media print {
-    @page { size: letter portrait; margin: 0.4in; }
-    body { background: white; }
-    .toolbar { display: none; }
-    .page { box-shadow: none; padding: 0; margin: 0; width: 100%; min-height: 0; }
+    @page { size: letter portrait; margin: 0; }
+    html, body { background: white !important; margin: 0 !important; padding: 0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .toolbar { display: none !important; }
+    .page { box-shadow: none !important; margin: 0 !important; width: 8.5in !important; min-height: 10.9in !important; max-height: 10.9in !important; padding: 0.4in 0.45in !important; overflow: hidden; page-break-after: avoid; }
   }
 </style>
 </head>
