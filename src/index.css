@@ -2,60 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap');
-@import url('https://api.fontshare.com/v2/css?f[]=garet@400,700&display=swap');
-
 @layer base {
   :root {
-    /* EXPLR-inspired dark theme with lime accent */
-    --background: 0 0% 7%;
-    --foreground: 0 0% 98%;
+    /* Program Profiles–inspired light theme with CSU green accent */
+    --background: 210 40% 96%;
+    --foreground: 217 32% 15%;
 
-    --card: 0 0% 11%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 217 32% 15%;
 
-    --popover: 0 0% 11%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 217 32% 15%;
 
-    /* Lime/chartreuse brand color matching explr.cc */
-    --primary: 75 100% 62%;
-    --primary-foreground: 0 0% 0%;
+    /* CSU green brand color */
+    --primary: 164 100% 21%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 210 40% 98%;
+    --secondary-foreground: 217 32% 15%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 210 40% 98%;
+    --muted-foreground: 215 16% 47%;
 
-    /* Lime accent for interactive elements */
-    --accent: 75 100% 62%;
-    --accent-foreground: 0 0% 0%;
+    /* Green-tinted accent for interactive surfaces */
+    --accent: 156 33% 93%;
+    --accent-foreground: 164 100% 21%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 75 100% 62%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 164 100% 21%;
 
     --radius: 0.5rem;
 
-    /* Custom semantic tokens */
-    --surface-dark: 0 0% 5%;
-    --surface-card: 0 0% 11%;
-    --text-muted: 0 0% 50%;
-    --lime: 75 100% 62%;
-    --emerald: 75 100% 62%;
-    --emerald-hover: 75 100% 68%;
+    /* Custom semantic tokens (kept names for backward compatibility) */
+    --surface-dark: 217 32% 15%;
+    --surface-card: 0 0% 100%;
+    --text-muted: 215 16% 47%;
+    --lime: 164 100% 21%;
+    --emerald: 164 100% 21%;
+    --emerald-hover: 164 100% 28%;
 
-    --sidebar-background: 0 0% 7%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 75 100% 62%;
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 75 100% 62%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 217 32% 15%;
+    --sidebar-primary: 164 100% 21%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 156 33% 93%;
+    --sidebar-accent-foreground: 164 100% 21%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 164 100% 21%;
   }
 }
 
@@ -66,13 +63,14 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
 
-  h1, h2, h3 {
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+  h1, h2, h3, h4 {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.015em;
+    color: hsl(var(--foreground));
   }
 }
 
