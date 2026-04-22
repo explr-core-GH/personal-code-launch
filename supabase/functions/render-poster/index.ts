@@ -4,8 +4,14 @@
 // Until that's wired up we return a placeholder URL after a short delay so
 // the client UI can be exercised end-to-end.
 
-import { corsHeaders } from "@supabase/supabase-js/cors";
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.45.0";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
 
 interface ExportBody {
   projectId: string;
