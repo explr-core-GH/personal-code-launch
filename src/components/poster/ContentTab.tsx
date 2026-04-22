@@ -4,9 +4,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Check, Lock, Lightbulb, Quote } from "lucide-react";
+import { Check, Lock, Lightbulb, Quote, Image as ImageIcon } from "lucide-react";
 import type { PosterContent } from "@/types/poster";
 import { cn } from "@/lib/utils";
+import { VisualsEditor } from "./VisualsEditor";
 
 type Section = {
   key: string;
@@ -23,6 +24,7 @@ type Section = {
 interface ContentTabProps {
   content: PosterContent;
   onChange: (patch: Partial<PosterContent>) => void;
+  projectId: string;
 }
 
 function countWords(s: string): number {
