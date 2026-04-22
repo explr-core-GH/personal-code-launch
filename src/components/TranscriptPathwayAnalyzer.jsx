@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { OHIO_DATA } from "@/config/ohio-data";
 import {
   Upload,
   Camera,
@@ -22,130 +24,7 @@ import {
   Printer,
 } from "lucide-react";
 
-/* ============================================================================
-   OHIO REFERENCE DATA
-   This is the grounding context the AI uses. Keep this in sync with
-   Ohio Department of Education and Workforce guidance. When you port
-   this to Lovable, move this to a Supabase table or a config file so
-   non-developers on your team can update it without a deploy.
-   ============================================================================ */
-
-const OHIO_DATA = {
-  creditRequirements: {
-    english: 4,
-    math: 4,
-    science: 3,
-    socialStudies: 3,
-    health: 0.5,
-    physicalEducation: 0.5,
-    fineArts: 1, // two semesters, waived for CTE pathway students
-    financialLiteracy: 0.5, // class of 2026+
-    electives: 5,
-    total: 20,
-  },
-  careerClusters: [
-    "Agriculture, Food & Natural Resources",
-    "Architecture & Construction",
-    "Arts, A/V Technology & Communications",
-    "Business Management & Administration",
-    "Education & Training",
-    "Finance",
-    "Government & Public Administration",
-    "Health Science",
-    "Hospitality & Tourism",
-    "Human Services",
-    "Information Technology",
-    "Law, Public Safety, Corrections & Security",
-    "Manufacturing",
-    "Marketing",
-    "Science, Technology, Engineering & Mathematics",
-    "Transportation, Distribution & Logistics",
-  ],
-  stateDefinedSeals: [
-    "OhioMeansJobs-Readiness Seal",
-    "Industry-Recognized Credential Seal",
-    "College-Ready Seal",
-    "Military Enlistment Seal",
-    "Citizenship Seal",
-    "Science Seal",
-    "Honors Diploma Seal",
-    "Seal of Biliteracy",
-    "Technology Seal",
-  ],
-  locallyDefinedSeals: [
-    "Student Engagement Seal",
-    "Community Service Seal",
-    "Fine and Performing Arts Seal",
-  ],
-  omjReadinessSkills: [
-    "Drug-Free Pledge",
-    "Self-Awareness & Self-Management",
-    "Responsibility",
-    "Work Ethic",
-    "Punctuality",
-    "Time Management",
-    "Teamwork & Collaboration",
-    "Diversity Awareness",
-    "Communication (Listening, Speaking, Writing)",
-    "Digital Technology",
-    "Critical Thinking & Problem Solving",
-    "Creativity",
-    "Leadership",
-    "Global & Cultural Awareness",
-    "Career Exploration (Planning & Management)",
-  ],
-
-  // Partner institutions — EXPLR's primary college pipeline
-  partnerInstitutions: {
-    csu: {
-      name: "Cleveland State University (CSU)",
-      shortName: "CSU",
-      type: "4-year public research university",
-      notableColleges: [
-        "Washkewicz College of Engineering (mechanical, electrical, civil, computer, chemical, biomedical)",
-        "Monte Ahuja College of Business (finance, marketing, management, supply chain)",
-        "College of Sciences & Health Professions (biology, nursing, psychology, computer science, data science)",
-        "Levin College of Public Affairs & Education (urban affairs, social work, teacher prep)",
-        "College of Arts & Sciences",
-        "College of Health (nursing, health sciences, speech)",
-        "Cleveland-Marshall College of Law (graduate)",
-      ],
-      notablePrograms: [
-        "Computer Science & Data Science",
-        "Engineering (mechanical, electrical, civil, biomedical)",
-        "Nursing (BSN and accelerated)",
-        "Urban Studies / Urban Planning",
-        "Teacher Education (Cleveland Teacher Residency)",
-        "Business Analytics / Supply Chain",
-      ],
-      dualEnrollment: "CCP (College Credit Plus) available; CSU is a major CCP partner for Cleveland-area high schools",
-    },
-    tric: {
-      name: "Cuyahoga Community College (Tri-C)",
-      shortName: "Tri-C",
-      type: "2-year community college with 4 campuses (Metro, Western, Eastern, Westshore) + multiple locations",
-      notableColleges: [
-        "Center for Manufacturing / Advanced Manufacturing Technology (MAGNET partnership)",
-        "Health Careers & Nursing (RN, CNA, surgical tech, medical assisting, phlebotomy)",
-        "Information Technology (cybersecurity, software development, network admin)",
-        "Public Safety Institute (police, fire, EMS)",
-        "Hospitality Management Center of Excellence",
-        "Creative Arts Academy",
-        "Automotive Technology",
-      ],
-      notablePrograms: [
-        "Associate of Applied Science in Manufacturing Engineering Technology",
-        "Associate of Applied Science in Nursing (ADN)",
-        "Associate in Cybersecurity / IT",
-        "Short-term certificates: Welding, CNC, Mechatronics, HVAC, Phlebotomy",
-        "Right Skills Now (accelerated manufacturing, partnered with MAGNET)",
-        "Early College programs with Cleveland-area high schools",
-      ],
-      dualEnrollment: "CCP partner with most Cleveland-area districts; strong CTAG articulation for CTE students",
-      transferToCsu: "Formal 2+2 transfer agreements with CSU for many majors (engineering tech, business, nursing pre-licensure, etc.)",
-    },
-  },
-};
+/* OHIO_DATA imported from @/config/ohio-data */
 
 /* ============================================================================
    API CALL — REPLACE THIS FOR LOVABLE
@@ -354,30 +233,22 @@ STRICT RULES:
   // Call our Supabase Edge Function, which proxies to Anthropic with the API key
   // kept server-side. The edge function URL is injected via env var so it
   // works across dev/prod without hardcoding.
-  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-  const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/analyze-transcript`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-    },
-    body: JSON.stringify({
+  const { data, error: fnError } = await supabase.functions.invoke("analyze-transcript", {
+    body: {
       model: "claude-haiku-4-5-20251001",
       max_tokens: 6000,
       system: systemPrompt,
       messages: [{ role: "user", content: userContent }],
-    }),
+    },
   });
 
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`API error ${response.status}: ${errText.slice(0, 300)}`);
+  if (fnError) {
+    throw new Error(`API error: ${fnError.message}`);
   }
-
-  const data = await response.json();
-  const textBlock = data.content?.find((c) => c.type === "text");
+  if (data?.error) {
+    throw new Error(`API error: ${typeof data.error === "string" ? data.error : JSON.stringify(data.error)}`);
+  }
+  const textBlock = data?.content?.find((c) => c.type === "text");
 
   if (!textBlock?.text) {
     throw new Error("The model returned an empty response. Please try again.");
