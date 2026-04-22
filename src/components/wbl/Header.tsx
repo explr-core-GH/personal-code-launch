@@ -45,7 +45,7 @@ export function Header() {
             </nav>
           )}
         </div>
-        {user && (
+        {user ? (
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <User className="w-4 h-4" />
@@ -56,6 +56,11 @@ export function Header() {
               <span className="hidden sm:inline ml-2">Sign Out</span>
             </Button>
           </div>
+        ) : (
+          <Button variant="default" size="sm" onClick={() => navigate('/auth')}>
+            <LogIn className="w-4 h-4" />
+            <span className="ml-2">Sign In</span>
+          </Button>
         )}
       </div>
     </header>
