@@ -11,6 +11,7 @@ import { makeDefaultContent, type PosterContent } from "@/types/poster";
 import { usePosterAutosave } from "@/hooks/usePosterAutosave";
 import { SaveIndicator } from "@/components/poster/SaveIndicator";
 import { ProjectInfoTab } from "@/components/poster/ProjectInfoTab";
+import { ContentTab } from "@/components/poster/ContentTab";
 import designTokens from "@/data/poster/design-tokens.json";
 
 type TabKey = "info" | "content" | "design" | "review";
@@ -207,10 +208,7 @@ export default function PosterEditor() {
                 <ProjectInfoTab content={content} onChange={updateContent} />
               </TabsContent>
               <TabsContent value="content" className="m-0 p-8">
-                <TabPlaceholder
-                  title="Content"
-                  body="Section list, editor, and coaching sidebar arrive in step 4."
-                />
+                <ContentTab content={content} onChange={updateContent} />
               </TabsContent>
               <TabsContent value="design" className="m-0 p-8">
                 <TabPlaceholder
