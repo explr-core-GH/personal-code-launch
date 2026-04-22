@@ -75,7 +75,7 @@ export default function PosterBuilderList() {
       .insert({
         user_id: user.id,
         name: "Untitled Poster",
-        content: content as unknown as PosterProjectRow["content"] as unknown as never,
+        content: content as unknown as never,
       })
       .select("id")
       .single();
