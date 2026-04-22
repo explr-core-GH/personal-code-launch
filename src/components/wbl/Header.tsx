@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 export function Header() {
   const { user, signOut } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navLinkClass = (path: string) =>
     cn(
