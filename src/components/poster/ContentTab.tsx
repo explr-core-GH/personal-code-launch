@@ -33,7 +33,7 @@ function countWords(s: string): number {
   return t.split(/\s+/).length;
 }
 
-export function ContentTab({ content, onChange }: ContentTabProps) {
+export function ContentTab({ content, onChange, projectId }: ContentTabProps) {
   const sections = useMemo(
     () =>
       ([...(scaffolding.sections as Section[])]).sort((a, b) => a.order - b.order),
