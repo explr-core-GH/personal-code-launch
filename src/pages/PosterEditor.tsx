@@ -12,6 +12,9 @@ import { usePosterAutosave } from "@/hooks/usePosterAutosave";
 import { SaveIndicator } from "@/components/poster/SaveIndicator";
 import { ProjectInfoTab } from "@/components/poster/ProjectInfoTab";
 import { ContentTab } from "@/components/poster/ContentTab";
+import { DesignTab } from "@/components/poster/DesignTab";
+import { PosterPreview } from "@/components/poster/PosterPreview";
+import { usePosterFonts } from "@/hooks/usePosterFonts";
 import designTokens from "@/data/poster/design-tokens.json";
 
 type TabKey = "info" | "content" | "design" | "review";
@@ -25,6 +28,8 @@ export default function PosterEditor() {
   const [content, setContent] = useState<PosterContent | null>(null);
   const [tab, setTab] = useState<TabKey>("info");
   const [mode, setMode] = useState<"full" | "cut-paste">("full");
+
+  usePosterFonts();
 
   // Load project once.
   useEffect(() => {
@@ -211,10 +216,7 @@ export default function PosterEditor() {
                 <ContentTab content={content} onChange={updateContent} />
               </TabsContent>
               <TabsContent value="design" className="m-0 p-8">
-                <TabPlaceholder
-                  title="Design"
-                  body="Format, template, palette, and typography pickers arrive in step 5."
-                />
+                <DesignTab content={content} onChange={updateContent} />
               </TabsContent>
               <TabsContent value="review" className="m-0 p-8">
                 <TabPlaceholder
@@ -233,13 +235,12 @@ export default function PosterEditor() {
               {mode === "cut-paste" ? "Cut & Paste preview" : "Live preview"}
             </span>
             <span className="text-[11px] text-muted-foreground">
-              Renders here in step 5
+              {summary?.format}
             </span>
           </div>
           <div className="flex-1 overflow-auto p-8 flex items-start justify-center">
-            <div className="w-full max-w-md aspect-[3/4] bg-card border border-dashed border-border rounded-md flex items-center justify-center text-xs text-muted-foreground text-center px-6">
-              Live poster preview will render here once the Design tab and templates
-              land in step 5.
+            <div className="w-full max-w-[680px]">
+              <PosterPreview content={content} mode={mode} />
             </div>
           </div>
         </div>
