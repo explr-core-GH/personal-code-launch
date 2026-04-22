@@ -1,0 +1,115 @@
+{
+  "$description": "Design system tokens for the EXPLR Poster Builder. The app reads this to populate the Design tab and to style the poster preview + PDF output.",
+
+  "palettes": [
+    { "key": "navy-gold",     "name": "Navy & Gold",     "header": "#1a2b4c", "accent": "#c9a961", "surface": "#ffffff", "bg": "#faf7f0", "text": "#1a1a1a", "muted": "#5a5a5a" },
+    { "key": "forest-sand",   "name": "Forest & Sand",   "header": "#2d4a33", "accent": "#d4a373", "surface": "#ffffff", "bg": "#faf4e8", "text": "#1a1a1a", "muted": "#5a5a5a" },
+    { "key": "slate-coral",   "name": "Slate & Coral",   "header": "#374b5a", "accent": "#e85a4f", "surface": "#ffffff", "bg": "#f8f7f5", "text": "#1a1a1a", "muted": "#5a5a5a" },
+    { "key": "ink-ochre",     "name": "Ink & Ochre",     "header": "#1c1c1c", "accent": "#d4a017", "surface": "#ffffff", "bg": "#fafaf7", "text": "#1a1a1a", "muted": "#5a5a5a" },
+    { "key": "ocean",         "name": "Ocean",           "header": "#0f3e5f", "accent": "#5aa9c9", "surface": "#ffffff", "bg": "#f0f6fa", "text": "#0a1e2d", "muted": "#4a6a7a" },
+    { "key": "graphite-lime", "name": "Graphite & Lime", "header": "#222222", "accent": "#a8d000", "surface": "#ffffff", "bg": "#f4f4f2", "text": "#1a1a1a", "muted": "#555555" },
+    { "key": "cream-ink",     "name": "Cream & Ink",     "header": "#1a1a1a", "accent": "#8a5a2a", "surface": "#ffffff", "bg": "#f5efdf", "text": "#1a1a1a", "muted": "#5a5a5a" },
+    { "key": "explr-brand",   "name": "EXPLR Brand",     "header": "#0a2540", "accent": "#ff6b35", "surface": "#ffffff", "bg": "#f7f8fa", "text": "#0a2540", "muted": "#4a5a6a",
+                              "$note": "Placeholder — confirm actual EXPLR brand colors with Chelsey before launch." }
+  ],
+
+  "fontPairs": [
+    {
+      "key": "playfair-source",
+      "name": "Classic Academic",
+      "display": "Playfair Display",
+      "body": "Source Sans 3",
+      "googleFontsUrl": "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700;900&family=Source+Sans+3:wght@300;400;500;600;700&display=swap"
+    },
+    {
+      "key": "fraunces-sora",
+      "name": "Modern Editorial",
+      "display": "Fraunces",
+      "body": "Sora",
+      "googleFontsUrl": "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&family=Sora:wght@300;400;500;600;700&display=swap"
+    },
+    {
+      "key": "dmserif-dmsans",
+      "name": "Elegant Display",
+      "display": "DM Serif Display",
+      "body": "DM Sans",
+      "googleFontsUrl": "https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+    },
+    {
+      "key": "plex-plex",
+      "name": "Technical",
+      "display": "IBM Plex Serif",
+      "body": "IBM Plex Sans",
+      "googleFontsUrl": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Serif:wght@400;500;600&display=swap"
+    }
+  ],
+
+  "templates": [
+    {
+      "key": "academic",
+      "name": "Academic Conference",
+      "description": "Top title band, multi-column body. The classic — works anywhere.",
+      "supportedFormats": ["poster-portrait", "poster-landscape", "trifold-standard", "trifold-large", "trifold-tabletop"]
+    },
+    {
+      "key": "editorial",
+      "name": "Editorial Feature",
+      "description": "Asymmetric hero title, numbered sections. Magazine-style.",
+      "supportedFormats": ["poster-portrait", "poster-landscape"]
+    }
+  ],
+
+  "formats": [
+    {
+      "key": "poster-portrait",
+      "name": "Poster — Portrait",
+      "label": "36\" × 48\"",
+      "kind": "poster",
+      "width": 36,
+      "height": 48
+    },
+    {
+      "key": "poster-landscape",
+      "name": "Poster — Landscape",
+      "label": "48\" × 36\"",
+      "kind": "poster",
+      "width": 48,
+      "height": 36
+    },
+    {
+      "key": "trifold-standard",
+      "name": "Tri-fold — Standard",
+      "label": "48\" × 36\" · 14/20/14",
+      "kind": "trifold",
+      "panels": { "left": { "w": 14, "h": 36 }, "center": { "w": 20, "h": 36 }, "right": { "w": 14, "h": 36 } }
+    },
+    {
+      "key": "trifold-large",
+      "name": "Tri-fold — Large",
+      "label": "60\" × 40\" · 18/24/18",
+      "kind": "trifold",
+      "panels": { "left": { "w": 18, "h": 40 }, "center": { "w": 24, "h": 40 }, "right": { "w": 18, "h": 40 } }
+    },
+    {
+      "key": "trifold-tabletop",
+      "name": "Tri-fold — Tabletop",
+      "label": "36\" × 24\" · 10.5/15/10.5",
+      "kind": "trifold",
+      "panels": { "left": { "w": 10.5, "h": 24 }, "center": { "w": 15, "h": 24 }, "right": { "w": 10.5, "h": 24 } }
+    }
+  ],
+
+  "print": {
+    "colorMode": "RGB",
+    "bleedInches": 0.125,
+    "safeZoneInches": 0.5,
+    "minImageDpi": 150,
+    "lowResPixelWarning": 800
+  },
+
+  "paperSizes": {
+    "$description": "Home/school printer paper sizes for Cut & Paste mode. printW and printH are the usable area after a 0.25\" margin.",
+    "letter":  { "name": "Letter (8.5\u00d711)",  "w": 8.5,  "h": 11,   "printW": 8.0,  "printH": 10.5, "margin": 0.25 },
+    "tabloid": { "name": "Tabloid (11\u00d717)",  "w": 11,   "h": 17,   "printW": 10.5, "printH": 16.5, "margin": 0.25 }
+  }
+}

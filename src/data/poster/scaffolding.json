@@ -1,0 +1,135 @@
+{
+  "$description": "Scaffolding content for each section of an EXPLR intern poster. The UI reads this to render section navigation, editor, and coaching sidebar. Edit this file to tune prompts or add sections — the app should render whatever's here.",
+  "sections": [
+    {
+      "key": "abstract",
+      "label": "Abstract",
+      "order": 1,
+      "required": true,
+      "wordMin": 60,
+      "wordMax": 100,
+      "prompt": "Your whole project in a tiny package — problem, what you did, what you found, why it matters.",
+      "tips": [
+        "Write this LAST, after everything else is done.",
+        "Answers: what problem, what you did, what you found, so what?",
+        "Avoid abstracts that are mostly background — the reader wants to know what YOU did."
+      ],
+      "example": "We designed a low-cost soil moisture sensor for community gardens in Cleveland. Using an ESP32 and capacitive sensors, we built and tested 12 units across 3 garden sites over 6 weeks. Sensors reported within 5% of commercial units at roughly 1/8th the cost, and gardeners reported they now water less often. A bigger pilot is planned for 2027."
+    },
+    {
+      "key": "problem",
+      "label": "Problem / Question",
+      "order": 2,
+      "required": true,
+      "wordMin": 50,
+      "wordMax": 100,
+      "prompt": "What you were trying to figure out, solve, or build — and why it matters.",
+      "tips": [
+        "State clearly what is broken, unknown, or needed.",
+        "Say who is affected or why the reader should care.",
+        "End with the specific question or goal you pursued.",
+        "Avoid starting with 'In today's world…'"
+      ],
+      "example": "Cleveland's community gardens rely mostly on guesswork for watering, which wastes water and stresses plants. Commercial soil moisture sensors cost $150+ per unit — unaffordable for volunteer-run gardens. We asked: can we build a sensor network that gives useful watering guidance for under $20 per garden?"
+    },
+    {
+      "key": "background",
+      "label": "Background",
+      "order": 3,
+      "required": false,
+      "wordMin": 75,
+      "wordMax": 150,
+      "prompt": "What was already known or built before you started — just enough context for your reader to follow along.",
+      "tips": [
+        "Include key terms or tech the reader needs.",
+        "Mention 1–3 things others have done in this space.",
+        "Point to what is still missing — which is what you worked on.",
+        "You are setting the stage, not giving a lecture."
+      ],
+      "example": "Capacitive soil moisture sensors measure the dielectric constant of soil — wetter soil gives a higher reading. Prior work at OSU showed that inexpensive capacitive sensors drift over time when exposed to outdoor humidity. Commercial systems (e.g., Vegetronix VH400) solve this with sealed probes but cost $80+. No existing open hardware solution combined sealed probes with low-cost wireless reporting."
+    },
+    {
+      "key": "approach",
+      "label": "Approach / Methods",
+      "order": 4,
+      "required": true,
+      "wordMin": 100,
+      "wordMax": 200,
+      "prompt": "The steps you took. Tools, materials, code, interviews, experiments.",
+      "tips": [
+        "Be specific about tools: 'Python pandas' not 'some code.'",
+        "A reader should roughly be able to reproduce what you did.",
+        "Visuals that work here: flowcharts, setup photos, screenshots."
+      ],
+      "example": "We designed a sealed capacitive probe using a PCB with a conformal coating. An ESP32-S3 reads the probe every 30 minutes and publishes to an MQTT broker. A Python script on a Raspberry Pi logs readings and serves a simple web dashboard. We deployed 12 units across 3 garden sites and compared readings to a Vegetronix VH400 at each site for 6 weeks."
+    },
+    {
+      "key": "results",
+      "label": "Results / Findings",
+      "order": 5,
+      "required": true,
+      "wordMin": 100,
+      "wordMax": 200,
+      "prompt": "What happened. What you made. What the data showed.",
+      "tips": [
+        "SHOW, don't just tell — include at least one chart or photo.",
+        "State the primary outcome (a number, a product, a finding).",
+        "Be honest about what didn't work.",
+        "Don't claim more than your data supports."
+      ],
+      "example": "Our sensors tracked the commercial reference within ±5% across all three sites. Total parts cost was $18 per sensor vs. $150+ commercial. All three garden coordinators reported they changed their watering behavior based on the dashboard. One sensor failed after two weeks of rain — the conformal coating wasn't thick enough at the probe tip. Field-replaceable probes solved this in our second batch."
+    },
+    {
+      "key": "reflection",
+      "label": "Reflection",
+      "order": 6,
+      "required": true,
+      "wordMin": 50,
+      "wordMax": 100,
+      "prompt": "What this project taught YOU as a student and future professional.",
+      "tips": [
+        "What skill did you build that you didn't have before?",
+        "What surprised you?",
+        "What would you do differently?"
+      ],
+      "example": "I had never designed a PCB before this internship — learning KiCad was frustrating for the first two weeks and then suddenly clicked. The biggest surprise was how much of the work wasn't electronics but talking to gardeners about what they actually wanted to see on the dashboard. Next time I'd interview users in week one, not week four."
+    },
+    {
+      "key": "nextSteps",
+      "label": "Next Steps",
+      "order": 7,
+      "required": false,
+      "wordMin": 40,
+      "wordMax": 80,
+      "prompt": "What you didn't get to, or what someone could do next.",
+      "tips": [
+        "This matters — it shows your project is part of something bigger.",
+        "'I ran out of time to test with more users' is a valid next step."
+      ],
+      "example": "A pilot across 10+ gardens would confirm that readings generalize across soil types. The dashboard should send SMS alerts when a garden dries out, and the sensor firmware needs over-the-air updates so we can patch field units without pulling them out of the ground."
+    },
+    {
+      "key": "acknowledgments",
+      "label": "Acknowledgments",
+      "order": 8,
+      "required": true,
+      "wordMin": 20,
+      "wordMax": 60,
+      "prompt": "Thank your mentor, host organization, EXPLR, and anyone who helped.",
+      "tips": [
+        "List your mentor by name and title.",
+        "Thank EXPLR, CSU, MAGNET, your host org, any funders."
+      ],
+      "example": "Special thanks to my mentor Jane Doe (Senior Engineer, MAGNET) and the team at Rid-All Green Partnership for hosting the pilot. This project was supported by EXPLR and the Cleveland State University / MAGNET Summer Internship Program."
+    }
+  ],
+  "projectTypeSectionKits": {
+    "$description": "For each project type, which sections are enabled by default. Students can override.",
+    "build":    ["abstract", "problem", "approach", "results", "reflection", "nextSteps", "acknowledgments"],
+    "data":     ["abstract", "problem", "background", "approach", "results", "reflection", "nextSteps", "acknowledgments"],
+    "research": ["abstract", "problem", "background", "approach", "results", "reflection", "nextSteps", "acknowledgments"],
+    "design":   ["abstract", "problem", "approach", "results", "reflection", "nextSteps", "acknowledgments"],
+    "other":    ["abstract", "problem", "background", "approach", "results", "reflection", "nextSteps", "acknowledgments"]
+  },
+  "soWhatPrompt": "In one sentence: why should someone walking past this poster care about it?"
+}
