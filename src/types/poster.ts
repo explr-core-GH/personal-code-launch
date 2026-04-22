@@ -56,8 +56,8 @@ export function makeDefaultContent(): PosterContent {
   allKeys.forEach((k) => (sections[k] = ""));
 
   // "build" is the default project type — use its enabled section kit.
-  const enabled =
-    (scaffolding.projectTypeSectionKits as Record<string, string[]>).build ?? allKeys;
+  const kits = scaffolding.projectTypeSectionKits as unknown as Record<string, string[]>;
+  const enabled = kits.build ?? allKeys;
 
   return {
     title: "",
