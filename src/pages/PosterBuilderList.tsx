@@ -19,6 +19,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { makeDefaultContent, type PosterContent, type PosterProjectRow } from "@/types/poster";
+import { PosterPreview } from "@/components/poster/PosterPreview";
+import { usePosterFonts } from "@/hooks/usePosterFonts";
 
 interface PosterRow {
   id: string;
@@ -33,6 +35,8 @@ export default function PosterBuilderList() {
   const [projects, setProjects] = useState<PosterRow[] | null>(null);
   const [creating, setCreating] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<PosterRow | null>(null);
+
+  usePosterFonts();
 
   useEffect(() => {
     if (!user) return;
@@ -261,12 +265,15 @@ function ProjectCard({
         onClick={onOpen}
         className="block w-full text-left"
       >
-        {/* Placeholder thumbnail — real miniature renders in a later step */}
-        <div className="aspect-[4/3] w-full bg-accent border-b border-border relative">
-          <div className="absolute inset-4 rounded-sm bg-card border border-border flex items-center justify-center">
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
-              {formatLabel}
-            </span>
+        {/* Live miniature preview */}
+        <div className="aspect-[4/3] w-full bg-muted/40 border-b border-border relative overflow-hidden">
+          <div className="absolute inset-0 flex items-center justify-center p-3 pointer-events-none">
+            <div className="w-full h-full max-w-[260px] flex items-center justify-center">
+              <PosterPreview content={content} mode="full" />
+            </div>
+          </div>
+          <div className="absolute top-2 left-2 px-2 py-0.5 rounded-sm bg-card/90 border border-border text-[10px] uppercase tracking-widest text-muted-foreground">
+            {formatLabel}
           </div>
         </div>
         <div className="p-4">
