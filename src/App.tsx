@@ -7,6 +7,8 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Resources from "./pages/Resources";
 import ProgramProfileBuilder from "./pages/ProgramProfileBuilder";
+import PosterBuilderList from "./pages/PosterBuilderList";
+import PosterEditor from "./pages/PosterEditor";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -29,6 +31,16 @@ const App = () => (
           <Route path="/program-profiles" element={
             <ProtectedRoute>
               <ProgramProfileBuilder />
+            </ProtectedRoute>
+          } />
+          <Route path="/poster-builder" element={
+            <ProtectedRoute>
+              <PosterBuilderList />
+            </ProtectedRoute>
+          } />
+          <Route path="/poster-builder/:id" element={
+            <ProtectedRoute>
+              <PosterEditor />
             </ProtectedRoute>
           } />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -29,6 +29,17 @@ export function Header() {
               <Link to="/program-profiles" className={navLinkClass('/program-profiles')}>
                 Program Profiles
               </Link>
+              <Link
+                to="/poster-builder"
+                className={cn(
+                  'text-sm font-medium transition-colors hover:text-primary',
+                  location.pathname.startsWith('/poster-builder')
+                    ? 'text-primary'
+                    : 'text-muted-foreground'
+                )}
+              >
+                Poster Builder
+              </Link>
               <Link to="/resources" className={navLinkClass('/resources')}>Resources</Link>
             </nav>
           )}
