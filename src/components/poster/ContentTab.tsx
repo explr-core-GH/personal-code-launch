@@ -4,9 +4,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Check, Lock, Lightbulb, Quote } from "lucide-react";
+import { Check, Lock, Lightbulb, Quote, Image as ImageIcon } from "lucide-react";
 import type { PosterContent } from "@/types/poster";
 import { cn } from "@/lib/utils";
+import { VisualsEditor } from "./VisualsEditor";
 
 type Section = {
   key: string;
@@ -23,6 +24,7 @@ type Section = {
 interface ContentTabProps {
   content: PosterContent;
   onChange: (patch: Partial<PosterContent>) => void;
+  projectId: string;
 }
 
 function countWords(s: string): number {
@@ -31,7 +33,7 @@ function countWords(s: string): number {
   return t.split(/\s+/).length;
 }
 
-export function ContentTab({ content, onChange }: ContentTabProps) {
+export function ContentTab({ content, onChange, projectId }: ContentTabProps) {
   const sections = useMemo(
     () =>
       ([...(scaffolding.sections as Section[])]).sort((a, b) => a.order - b.order),
@@ -78,6 +80,7 @@ export function ContentTab({ content, onChange }: ContentTabProps) {
             const enabled = enabledSet.has(s.key);
             const wc = countWords(content.sections[s.key] ?? "");
             const meets = enabled && wc >= s.wordMin;
+            const visualCount = content.visuals.filter((v) => v.section === s.key).length;
             const isActive = s.key === activeKey;
             return (
               <li key={s.key}>
@@ -97,8 +100,16 @@ export function ContentTab({ content, onChange }: ContentTabProps) {
                   </span>
                   <span className="flex-1 min-w-0">
                     <span className="block truncate">{s.label}</span>
-                    <span className="block text-[10px] text-muted-foreground/80 mt-0.5">
-                      {enabled ? `${wc} / ${s.wordMin}–${s.wordMax} words` : "Off"}
+                    <span className="block text-[10px] text-muted-foreground/80 mt-0.5 flex items-center gap-1.5">
+                      <span>
+                        {enabled ? `${wc} / ${s.wordMin}–${s.wordMax} words` : "Off"}
+                      </span>
+                      {visualCount > 0 && (
+                        <span className="inline-flex items-center gap-0.5">
+                          <ImageIcon className="w-2.5 h-2.5" />
+                          {visualCount}
+                        </span>
+                      )}
                     </span>
                   </span>
                   {meets ? (
@@ -203,6 +214,13 @@ export function ContentTab({ content, onChange }: ContentTabProps) {
                 </p>
               </div>
             </div>
+
+            <VisualsEditor
+              projectId={projectId}
+              sectionKey={active.key}
+              content={content}
+              onChange={onChange}
+            />
           </>
         )}
       </div>
