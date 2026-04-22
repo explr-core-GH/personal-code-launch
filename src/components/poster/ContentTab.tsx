@@ -80,6 +80,7 @@ export function ContentTab({ content, onChange, projectId }: ContentTabProps) {
             const enabled = enabledSet.has(s.key);
             const wc = countWords(content.sections[s.key] ?? "");
             const meets = enabled && wc >= s.wordMin;
+            const visualCount = content.visuals.filter((v) => v.section === s.key).length;
             const isActive = s.key === activeKey;
             return (
               <li key={s.key}>
@@ -99,8 +100,16 @@ export function ContentTab({ content, onChange, projectId }: ContentTabProps) {
                   </span>
                   <span className="flex-1 min-w-0">
                     <span className="block truncate">{s.label}</span>
-                    <span className="block text-[10px] text-muted-foreground/80 mt-0.5">
-                      {enabled ? `${wc} / ${s.wordMin}–${s.wordMax} words` : "Off"}
+                    <span className="block text-[10px] text-muted-foreground/80 mt-0.5 flex items-center gap-1.5">
+                      <span>
+                        {enabled ? `${wc} / ${s.wordMin}–${s.wordMax} words` : "Off"}
+                      </span>
+                      {visualCount > 0 && (
+                        <span className="inline-flex items-center gap-0.5">
+                          <ImageIcon className="w-2.5 h-2.5" />
+                          {visualCount}
+                        </span>
+                      )}
                     </span>
                   </span>
                   {meets ? (
@@ -205,6 +214,13 @@ export function ContentTab({ content, onChange, projectId }: ContentTabProps) {
                 </p>
               </div>
             </div>
+
+            <VisualsEditor
+              projectId={projectId}
+              sectionKey={active.key}
+              content={content}
+              onChange={onChange}
+            />
           </>
         )}
       </div>
