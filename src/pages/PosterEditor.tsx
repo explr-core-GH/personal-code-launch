@@ -11,6 +11,7 @@ import { makeDefaultContent, type PosterContent } from "@/types/poster";
 import { usePosterAutosave } from "@/hooks/usePosterAutosave";
 import { SaveIndicator } from "@/components/poster/SaveIndicator";
 import { ProjectInfoTab } from "@/components/poster/ProjectInfoTab";
+import { ContentTab } from "@/components/poster/ContentTab";
 import designTokens from "@/data/poster/design-tokens.json";
 
 type TabKey = "info" | "content" | "design" | "review";
