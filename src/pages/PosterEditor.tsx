@@ -16,6 +16,9 @@ import { DesignTab } from "@/components/poster/DesignTab";
 import { PosterPreview } from "@/components/poster/PosterPreview";
 import { usePosterFonts } from "@/hooks/usePosterFonts";
 import designTokens from "@/data/poster/design-tokens.json";
+import { CutPasteView } from "@/components/poster/CutPasteView";
+import { ReviewTab } from "@/components/poster/ReviewTab";
+import { ExportDialog } from "@/components/poster/ExportDialog";
 
 type TabKey = "info" | "content" | "design" | "review";
 
@@ -28,6 +31,8 @@ export default function PosterEditor() {
   const [content, setContent] = useState<PosterContent | null>(null);
   const [tab, setTab] = useState<TabKey>("info");
   const [mode, setMode] = useState<"full" | "cut-paste">("full");
+  const [paperSize, setPaperSize] = useState<"letter" | "tabloid">("letter");
+  const [exportOpen, setExportOpen] = useState(false);
 
   usePosterFonts();
 
@@ -171,7 +176,7 @@ export default function PosterEditor() {
                 Cut &amp; Paste
               </button>
             </div>
-            <Button size="sm" disabled>
+            <Button size="sm" onClick={() => setExportOpen(true)}>
               <Download className="w-4 h-4 mr-1.5" />
               Export
             </Button>
@@ -213,16 +218,17 @@ export default function PosterEditor() {
                 <ProjectInfoTab content={content} onChange={updateContent} />
               </TabsContent>
               <TabsContent value="content" className="m-0 p-8">
-                <ContentTab content={content} onChange={updateContent} />
+                <ContentTab
+                  content={content}
+                  onChange={updateContent}
+                  projectId={id!}
+                />
               </TabsContent>
               <TabsContent value="design" className="m-0 p-8">
                 <DesignTab content={content} onChange={updateContent} />
               </TabsContent>
               <TabsContent value="review" className="m-0 p-8">
-                <TabPlaceholder
-                  title="Review"
-                  body="Pre-flight checklist and the 'so what?' prompt arrive in step 9."
-                />
+                <ReviewTab content={content} onChange={updateContent} />
               </TabsContent>
             </div>
           </Tabs>
@@ -230,21 +236,53 @@ export default function PosterEditor() {
 
         {/* Right: preview */}
         <div className="flex flex-col min-h-0 bg-muted/40">
-          <div className="flex items-center justify-between px-5 h-11 border-b border-border bg-card">
+          <div className="flex items-center justify-between px-5 h-11 border-b border-border bg-card gap-3">
             <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
-              {mode === "cut-paste" ? "Cut & Paste preview" : "Live preview"}
+              {mode === "cut-paste" ? "Cut & Paste plan" : "Live preview"}
             </span>
-            <span className="text-[11px] text-muted-foreground">
-              {summary?.format}
-            </span>
+            {mode === "cut-paste" ? (
+              <div className="flex items-center bg-muted rounded-md p-0.5 border border-border">
+                {(["letter", "tabloid"] as const).map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setPaperSize(s)}
+                    className={
+                      "px-2.5 py-0.5 text-[11px] rounded-sm transition-colors " +
+                      (paperSize === s
+                        ? "bg-card text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground")
+                    }
+                  >
+                    {s === "letter" ? "Letter" : "Tabloid"}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <span className="text-[11px] text-muted-foreground">
+                {summary?.format}
+              </span>
+            )}
           </div>
           <div className="flex-1 overflow-auto p-8 flex items-start justify-center">
-            <div className="w-full max-w-[680px]">
-              <PosterPreview content={content} mode={mode} />
-            </div>
+            {mode === "cut-paste" ? (
+              <CutPasteView content={content} paperSize={paperSize} />
+            ) : (
+              <div className="w-full max-w-[680px]">
+                <PosterPreview content={content} mode={mode} />
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      <ExportDialog
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        projectId={id!}
+        content={content}
+        mode={mode}
+      />
     </div>
   );
 }
