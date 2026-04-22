@@ -41,6 +41,9 @@ export function Header() {
               >
                 Poster Builder
               </Link>
+              <Link to="/pathway-analyzer" className={navLinkClass('/pathway-analyzer')}>
+                Pathway Analyzer
+              </Link>
               <Link to="/resources" className={navLinkClass('/resources')}>Resources</Link>
             </nav>
           )}
