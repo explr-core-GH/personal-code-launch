@@ -24,29 +24,27 @@ export function Header() {
               EXPLR<span className="text-primary">_</span><span className="text-primary">TOOLS</span>
             </span>
           </Link>
-          {user && (
-            <nav className="hidden md:flex items-center gap-5">
-              <Link to="/" className={navLinkClass('/')}>WBL Planner</Link>
-              <Link to="/program-profiles" className={navLinkClass('/program-profiles')}>
-                Program Profiles
-              </Link>
-              <Link
-                to="/poster-builder"
-                className={cn(
-                  'text-sm font-medium transition-colors hover:text-primary',
-                  location.pathname.startsWith('/poster-builder')
-                    ? 'text-primary'
-                    : 'text-muted-foreground'
-                )}
-              >
-                Poster Builder
-              </Link>
-              <Link to="/pathway-analyzer" className={navLinkClass('/pathway-analyzer')}>
-                Pathway Analyzer
-              </Link>
-              <Link to="/resources" className={navLinkClass('/resources')}>Resources</Link>
-            </nav>
-          )}
+          <nav className="hidden md:flex items-center gap-5">
+            <Link to="/" className={navLinkClass('/')}>WBL Planner</Link>
+            <Link to="/program-profiles" className={navLinkClass('/program-profiles')}>
+              Program Profiles
+            </Link>
+            <Link
+              to="/poster-builder"
+              className={cn(
+                'text-sm font-medium transition-colors hover:text-primary',
+                location.pathname.startsWith('/poster-builder')
+                  ? 'text-primary'
+                  : 'text-muted-foreground'
+              )}
+            >
+              Poster Builder
+            </Link>
+            <Link to="/pathway-analyzer" className={navLinkClass('/pathway-analyzer')}>
+              Pathway Analyzer
+            </Link>
+            <Link to="/resources" className={navLinkClass('/resources')}>Resources</Link>
+          </nav>
         </div>
         {user ? (
           <div className="flex items-center gap-3">
