@@ -24,31 +24,11 @@ const App = () => (
         <Routes>
           <Route path="/auth" element={<Auth />} />
           <Route path="/" element={<Index />} />
-          <Route path="/resources" element={
-            <ProtectedRoute>
-              <Resources />
-            </ProtectedRoute>
-          } />
-          <Route path="/program-profiles" element={
-            <ProtectedRoute>
-              <ProgramProfileBuilder />
-            </ProtectedRoute>
-          } />
-          <Route path="/poster-builder" element={
-            <ProtectedRoute>
-              <PosterBuilderList />
-            </ProtectedRoute>
-          } />
-          <Route path="/poster-builder/:id" element={
-            <ProtectedRoute>
-              <PosterEditor />
-            </ProtectedRoute>
-          } />
-          <Route path="/pathway-analyzer" element={
-            <ProtectedRoute>
-              <PathwayAnalyzer />
-            </ProtectedRoute>
-          } />
+          <Route path="/resources" element={<Resources />} />
+          <Route path="/program-profiles" element={<ProgramProfileBuilder />} />
+          <Route path="/poster-builder" element={<PosterBuilderList />} />
+          <Route path="/poster-builder/:id" element={<PosterEditor />} />
+          <Route path="/pathway-analyzer" element={<PathwayAnalyzer />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
