@@ -19,6 +19,12 @@ export function Header() {
     <header className="px-6 py-4 flex-shrink-0 bg-background border-b border-border">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-6">
+          {location.pathname !== '/' && (
+            <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="gap-2">
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Home</span>
+            </Button>
+          )}
           <Link to="/" className="flex items-center gap-3">
             <span className="text-xl font-bold tracking-tight text-foreground">
               EXPLR<span className="text-primary">_</span><span className="text-primary">TOOLS</span>
