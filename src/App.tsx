@@ -27,6 +27,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/program-profiles" element={<ProgramProfileBuilder />} />
+          <Route path="/program-riasec" element={<ProgramRiasecCoder />} />
           <Route path="/poster-builder" element={<PosterBuilderList />} />
           <Route path="/poster-builder/:id" element={<PosterEditor />} />
           <Route path="/pathway-analyzer" element={<PathwayAnalyzer />} />
