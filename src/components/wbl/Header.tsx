@@ -29,6 +29,9 @@ export function Header() {
             <Link to="/program-profiles" className={navLinkClass('/program-profiles')}>
               Program Profiles
             </Link>
+            <Link to="/program-riasec" className={navLinkClass('/program-riasec')}>
+              Program RIASEC
+            </Link>
             <Link
               to="/poster-builder"
               className={cn(
