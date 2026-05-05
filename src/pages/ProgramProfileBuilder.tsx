@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Header } from "@/components/wbl/Header";
 import * as LucideIcons from "lucide-react";
 import {
   Plus, Trash2, Edit3, Save, Download, Copy, X, Check, Search,
@@ -724,6 +725,7 @@ export default function ProgramProfileBuilder() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#f1f5f9", fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+      <Header />
       <style>{PRINT_CSS}</style>
       {toast && (
         <div className="no-print" style={{
