@@ -52,6 +52,9 @@ export function Header() {
             <Link to="/pathway-analyzer" className={navLinkClass('/pathway-analyzer')}>
               Pathway Analyzer
             </Link>
+            <Link to="/minecraft-export" className={navLinkClass('/minecraft-export')}>
+              Minecraft Export
+            </Link>
             <Link to="/resources" className={navLinkClass('/resources')}>Resources</Link>
           </nav>
         </div>

@@ -11,6 +11,7 @@ import PosterBuilderList from "./pages/PosterBuilderList";
 import PosterEditor from "./pages/PosterEditor";
 import PathwayAnalyzer from "./pages/PathwayAnalyzer";
 import ProgramRiasecCoder from "./pages/ProgramRiasecCoder";
+import MinecraftExport from "./pages/MinecraftExport";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/poster-builder" element={<PosterBuilderList />} />
           <Route path="/poster-builder/:id" element={<PosterEditor />} />
           <Route path="/pathway-analyzer" element={<PathwayAnalyzer />} />
+          <Route path="/minecraft-export" element={<MinecraftExport />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
