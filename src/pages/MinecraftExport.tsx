@@ -8,15 +8,22 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { ModelPreview } from '@/components/minecraft/ModelPreview';
 import { optimizeGlb, type OptimizerStats } from '@/lib/minecraft/glbOptimizer';
+import { optimizeMcstructure } from '@/lib/minecraft/mcstructure';
 import { cn } from '@/lib/utils';
 
 type Status = 'idle' | 'processing' | 'ready' | 'error';
+
+type ExtendedStats = OptimizerStats & {
+  inputBlocks?: number;
+  paletteEntries?: number;
+  sourceFormat?: 'glb' | 'mcstructure';
+};
 
 interface Result {
   fileName: string;
   scene: THREE.Group;
   glb: ArrayBuffer;
-  stats: OptimizerStats;
+  stats: ExtendedStats;
 }
 
 function formatBytes(bytes: number): string {
@@ -52,8 +59,11 @@ const MinecraftExport = () => {
   }, [result]);
 
   const handleFile = useCallback(async (file: File) => {
-    if (!file.name.toLowerCase().endsWith('.glb')) {
-      toast.error('Please upload a .glb file from Minecraft Education.');
+    const lower = file.name.toLowerCase();
+    const isGlb = lower.endsWith('.glb');
+    const isMcStructure = lower.endsWith('.mcstructure');
+    if (!isGlb && !isMcStructure) {
+      toast.error('Please upload a .glb or .mcstructure file from Minecraft Education.');
       return;
     }
     setStatus('processing');
@@ -61,12 +71,15 @@ const MinecraftExport = () => {
     setResult(null);
     try {
       const buffer = await file.arrayBuffer();
-      const optimized = await optimizeGlb(buffer);
+      const optimized = isGlb
+        ? await optimizeGlb(buffer)
+        : await optimizeMcstructure(buffer);
+      const baseName = file.name.replace(/\.(glb|mcstructure)$/i, '');
       setResult({
-        fileName: file.name.replace(/\.glb$/i, '') + '-optimized.glb',
+        fileName: `${baseName}-optimized.glb`,
         scene: optimized.scene,
         glb: optimized.glb,
-        stats: optimized.stats,
+        stats: optimized.stats as ExtendedStats,
       });
       setStatus('ready');
       toast.success('Optimization complete!');
@@ -115,21 +128,32 @@ const MinecraftExport = () => {
             Minecraft → DelightEx Exporter
           </h1>
           <p className="text-muted-foreground mt-2">
-            Upload a <code className="text-foreground">.glb</code> exported from a Minecraft
-            Education Structure Block, and download an optimized version ready to import into
-            DelightEx (CoSpaces).
+            Upload a <code className="text-foreground">.glb</code> or{' '}
+            <code className="text-foreground">.mcstructure</code> file from a Minecraft Education
+            Structure Block, and download an optimized version ready to import into DelightEx
+            (CoSpaces).
           </p>
         </div>
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-lg">How to get a .glb from Minecraft Education</CardTitle>
-            <CardDescription>
-              In your world, give yourself a structure block with{' '}
-              <code className="text-foreground">/give @p structure_block</code>, place it next to
-              your build, set the size to enclose it, switch the mode to{' '}
-              <strong>3D Export</strong>, and click <strong>Export</strong>. Save the .glb to your
-              computer, then upload it below.
+            <CardTitle className="text-lg">How to get a file from Minecraft Education</CardTitle>
+            <CardDescription className="space-y-2">
+              <p>
+                In your world, give yourself a structure block with{' '}
+                <code className="text-foreground">/give @p structure_block</code>, place it next to
+                your build, and set the size to enclose it.
+              </p>
+              <p>
+                <strong>For best results,</strong> set the mode to{' '}
+                <strong>3D Export</strong> and click <strong>Export</strong> — you'll get a{' '}
+                <code>.glb</code> with the real Minecraft textures.
+              </p>
+              <p>
+                <strong>Or:</strong> use <strong>Save</strong> mode and click <strong>Export</strong>{' '}
+                — you'll get a <code>.mcstructure</code> file. The exporter will color each block
+                type and convert it to a glb for you (no textures, just solid colors).
+              </p>
             </CardDescription>
           </CardHeader>
         </Card>
@@ -152,7 +176,7 @@ const MinecraftExport = () => {
           <input
             ref={inputRef}
             type="file"
-            accept=".glb,model/gltf-binary"
+            accept=".glb,.mcstructure,model/gltf-binary"
             className="hidden"
             onChange={onChange}
           />
@@ -166,7 +190,7 @@ const MinecraftExport = () => {
               <Upload className="w-8 h-8" />
               <div>
                 <p className="font-medium text-foreground">
-                  Drop your Minecraft .glb file here
+                  Drop your Minecraft .glb or .mcstructure file here
                 </p>
                 <p className="text-sm mt-1">or click to choose a file</p>
               </div>
@@ -203,21 +227,43 @@ const MinecraftExport = () => {
                   <CardTitle className="text-lg">Result</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm">
-                  <StatRow
-                    label="File size"
-                    before={formatBytes(result.stats.inputBytes)}
-                    after={formatBytes(result.stats.outputBytes)}
-                    delta={formatPercent(result.stats.inputBytes, result.stats.outputBytes)}
-                  />
-                  <StatRow
-                    label="Triangles"
-                    before={result.stats.inputTriangles.toLocaleString()}
-                    after={result.stats.outputTriangles.toLocaleString()}
-                    delta={formatPercent(
-                      result.stats.inputTriangles,
-                      result.stats.outputTriangles,
-                    )}
-                  />
+                  {result.stats.sourceFormat === 'mcstructure' ? (
+                    <>
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Output .glb size</span>
+                        <span>{formatBytes(result.stats.outputBytes)}</span>
+                      </div>
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Blocks placed</span>
+                        <span>{result.stats.inputBlocks?.toLocaleString() ?? '—'}</span>
+                      </div>
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Output triangles</span>
+                        <span>{result.stats.outputTriangles.toLocaleString()}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <StatRow
+                        label="File size"
+                        before={formatBytes(result.stats.inputBytes)}
+                        after={formatBytes(result.stats.outputBytes)}
+                        delta={formatPercent(
+                          result.stats.inputBytes,
+                          result.stats.outputBytes,
+                        )}
+                      />
+                      <StatRow
+                        label="Triangles"
+                        before={result.stats.inputTriangles.toLocaleString()}
+                        after={result.stats.outputTriangles.toLocaleString()}
+                        delta={formatPercent(
+                          result.stats.inputTriangles,
+                          result.stats.outputTriangles,
+                        )}
+                      />
+                    </>
+                  )}
                   <div className="flex justify-between text-muted-foreground">
                     <span>Block types</span>
                     <span>{result.stats.materialGroups}</span>

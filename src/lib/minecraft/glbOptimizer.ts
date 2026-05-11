@@ -27,7 +27,7 @@ interface FaceKey {
   slice: number;
 }
 
-interface FaceGroup extends FaceKey {
+export interface FaceGroup extends FaceKey {
   cells: Set<string>;
   uMin: number;
   uMax: number;
@@ -217,7 +217,7 @@ function classifyAndStamp(
   }
 }
 
-function buildMeshFromGroup(group: FaceGroup): THREE.Mesh | null {
+export function buildMeshFromGroup(group: FaceGroup): THREE.Mesh | null {
   if (group.cells.size === 0) return null;
   const width = group.uMax - group.uMin;
   const height = group.vMax - group.vMin;
@@ -334,7 +334,7 @@ function prepareMaterial(source: THREE.Material): THREE.Material {
   return cloned;
 }
 
-function exportGlb(scene: THREE.Object3D): Promise<ArrayBuffer> {
+export function exportGlb(scene: THREE.Object3D): Promise<ArrayBuffer> {
   return new Promise((resolve, reject) => {
     const exporter = new GLTFExporter();
     exporter.parse(
