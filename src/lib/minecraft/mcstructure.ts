@@ -8,22 +8,35 @@ import {
   type OptimizerResult,
   type OptimizerStats,
 } from './glbOptimizer';
+import {
+  classifyShape,
+  isFullCube,
+  shapeBoxes,
+  type Box,
+  type Shape,
+  type StateMap,
+} from './blockShapes';
 
 const AIR_INDEX = -1;
+
+export interface PaletteEntry {
+  name: string;
+  states: StateMap;
+}
 
 export interface McStructureData {
   sizeX: number;
   sizeY: number;
   sizeZ: number;
-  paletteNames: string[];
+  palette: PaletteEntry[];
   blockIndices: Int32Array;
 }
 
 /**
  * Parse a Bedrock .mcstructure file (raw little-endian NBT, no gzip).
- * Returns the build dimensions, the palette of block names, and a flat
- * Int32Array of palette indices in x-major / y-mid / z-minor order. Cells
- * containing air or non-cube blocks are flagged with -1 ("air").
+ * Returns the build dimensions, the palette (block name + state compound
+ * per entry), and a flat Int32Array of palette indices in x-major /
+ * y-mid / z-minor order. Cells containing air are -1.
  */
 export function parseMcstructure(buffer: ArrayBuffer): McStructureData {
   const parsed = parseNbt(buffer);
@@ -55,9 +68,12 @@ export function parseMcstructure(buffer: ArrayBuffer): McStructureData {
     throw new Error('mcstructure: missing palette.default.block_palette');
   }
 
-  const paletteNames = blockPalette.map((entry) => {
+  const paletteEntries: PaletteEntry[] = blockPalette.map((entry) => {
     const compound = entry as NbtCompound;
-    return (compound.name as string) ?? 'minecraft:air';
+    return {
+      name: (compound.name as string) ?? 'minecraft:air',
+      states: (compound.states as StateMap | undefined) ?? {},
+    };
   });
 
   const blockIndices = new Int32Array(expected);
@@ -65,39 +81,62 @@ export function parseMcstructure(buffer: ArrayBuffer): McStructureData {
     blockIndices[i] = layer0[i];
   }
 
-  return { sizeX, sizeY, sizeZ, paletteNames, blockIndices };
+  return { sizeX, sizeY, sizeZ, palette: paletteEntries, blockIndices };
 }
 
-interface VoxelGrid {
+interface ShapedInstance {
+  matId: number;
+  shape: Shape;
+  x: number;
+  y: number;
+  z: number;
+}
+
+interface VoxelData {
   dims: [number, number, number];
-  /** materialId for each voxel, or -1 for empty. Same indexing as blockIndices. */
-  cells: Int32Array;
+  /** materialId for full cubes only, or -1. Cubes occlude neighboring faces. */
+  cubeCells: Int32Array;
+  /** Non-cube blocks rendered as their own geometry. */
+  shapedInstances: ShapedInstance[];
   /** materialId -> three.js material */
   materials: THREE.Material[];
-  /** materialId -> readable name */
+  /** materialId -> readable name (the hex color) */
   materialNames: string[];
-  /** count of non-empty voxels */
+  /** count of all non-air, non-skipped blocks (cubes + shaped) */
   filledCount: number;
 }
 
-function buildVoxelGrid(data: McStructureData): VoxelGrid {
-  const { sizeX, sizeY, sizeZ, paletteNames, blockIndices } = data;
-  const cells = new Int32Array(sizeX * sizeY * sizeZ).fill(-1);
+function voxelIndex(
+  x: number,
+  y: number,
+  z: number,
+  sy: number,
+  sz: number,
+): number {
+  return x * sy * sz + y * sz + z;
+}
 
-  // Resolve each palette slot to either a materialId or "skip"
-  const colorByPaletteIdx: (string | null)[] = paletteNames.map((name) =>
-    colorForBlock(name),
-  );
+function buildVoxelData(data: McStructureData): VoxelData {
+  const { sizeX, sizeY, sizeZ, palette, blockIndices } = data;
+  const cubeCells = new Int32Array(sizeX * sizeY * sizeZ).fill(AIR_INDEX);
 
-  // Deduplicate colors across the palette so identical-color blocks share a material
+  // Per palette slot: classify shape and resolve color → materialId
+  const slotShape: Shape[] = palette.map((p) => {
+    const color = colorForBlock(p.name);
+    if (color === null) return { kind: 'skip' };
+    return classifyShape(p.name, p.states);
+  });
+  const slotColor: (string | null)[] = palette.map((p) => colorForBlock(p.name));
+
   const colorToMaterialId = new Map<string, number>();
   const materials: THREE.Material[] = [];
   const materialNames: string[] = [];
+  const slotMatId = new Int32Array(palette.length).fill(-1);
 
-  const paletteToMaterial = new Int32Array(paletteNames.length).fill(-1);
-  for (let p = 0; p < paletteNames.length; p++) {
-    const color = colorByPaletteIdx[p];
+  for (let p = 0; p < palette.length; p++) {
+    const color = slotColor[p];
     if (color === null) continue;
+    if (slotShape[p].kind === 'skip') continue;
     let matId = colorToMaterialId.get(color);
     if (matId === undefined) {
       matId = materials.length;
@@ -111,39 +150,42 @@ function buildVoxelGrid(data: McStructureData): VoxelGrid {
       materialNames.push(color);
       colorToMaterialId.set(color, matId);
     }
-    paletteToMaterial[p] = matId;
+    slotMatId[p] = matId;
   }
 
+  const shapedInstances: ShapedInstance[] = [];
   let filledCount = 0;
-  for (let i = 0; i < blockIndices.length; i++) {
-    const pi = blockIndices[i];
-    if (pi < 0) continue;
-    const matId = paletteToMaterial[pi];
-    if (matId < 0) continue;
-    cells[i] = matId;
-    filledCount++;
+
+  for (let x = 0; x < sizeX; x++) {
+    for (let y = 0; y < sizeY; y++) {
+      for (let z = 0; z < sizeZ; z++) {
+        const i = voxelIndex(x, y, z, sizeY, sizeZ);
+        const pi = blockIndices[i];
+        if (pi < 0 || pi >= palette.length) continue;
+        const matId = slotMatId[pi];
+        if (matId < 0) continue;
+        const shape = slotShape[pi];
+        filledCount++;
+        if (isFullCube(shape)) {
+          cubeCells[i] = matId;
+        } else {
+          shapedInstances.push({ matId, shape, x, y, z });
+        }
+      }
+    }
   }
 
   return {
     dims: [sizeX, sizeY, sizeZ],
-    cells,
+    cubeCells,
+    shapedInstances,
     materials,
     materialNames,
     filledCount,
   };
 }
 
-function voxelIndex(
-  x: number,
-  y: number,
-  z: number,
-  sizeY: number,
-  sizeZ: number,
-): number {
-  return x * sizeY * sizeZ + y * sizeZ + z;
-}
-
-function getMat(
+function getCube(
   cells: Int32Array,
   x: number,
   y: number,
@@ -158,14 +200,17 @@ function getMat(
 
 /**
  * For each (material, axis, sign, slice), emit only the visible cells
- * (occupied by this material AND the neighbor in the face direction is
- * not the same material). Internal faces shared between two same-material
- * blocks are skipped, which is where the file-size win comes from.
+ * (occupied by this material AND the neighbor cube is not the same
+ * material). Shaped blocks at the neighbor cell count as "air" here, so
+ * the cube face is emitted in full (the shape sits on top of it).
  */
-function buildFaceGroups(grid: VoxelGrid): Map<string, FaceGroup> {
+function buildFaceGroups(
+  cubeCells: Int32Array,
+  materials: THREE.Material[],
+  dims: [number, number, number],
+): Map<string, FaceGroup> {
   const groups = new Map<string, FaceGroup>();
-  const [sx, sy, sz] = grid.dims;
-  const cells = grid.cells;
+  const [sx, sy, sz] = dims;
 
   const addFace = (
     material: THREE.Material,
@@ -203,33 +248,27 @@ function buildFaceGroups(grid: VoxelGrid): Map<string, FaceGroup> {
   for (let x = 0; x < sx; x++) {
     for (let y = 0; y < sy; y++) {
       for (let z = 0; z < sz; z++) {
-        const m = cells[voxelIndex(x, y, z, sy, sz)];
+        const m = cubeCells[voxelIndex(x, y, z, sy, sz)];
         if (m < 0) continue;
-        const material = grid.materials[m];
+        const material = materials[m];
         const materialId = material.uuid;
 
-        // +X face at slice = x+1, axis 0, sign +1, u=y, v=z
-        if (getMat(cells, x + 1, y, z, sx, sy, sz) !== m) {
+        if (getCube(cubeCells, x + 1, y, z, sx, sy, sz) !== m) {
           addFace(material, materialId, 0, 1, x + 1, y, z);
         }
-        // -X face at slice = x, axis 0, sign -1
-        if (getMat(cells, x - 1, y, z, sx, sy, sz) !== m) {
+        if (getCube(cubeCells, x - 1, y, z, sx, sy, sz) !== m) {
           addFace(material, materialId, 0, -1, x, y, z);
         }
-        // +Y face at slice = y+1, axis 1, sign +1, u=z, v=x
-        if (getMat(cells, x, y + 1, z, sx, sy, sz) !== m) {
+        if (getCube(cubeCells, x, y + 1, z, sx, sy, sz) !== m) {
           addFace(material, materialId, 1, 1, y + 1, z, x);
         }
-        // -Y face at slice = y, axis 1, sign -1
-        if (getMat(cells, x, y - 1, z, sx, sy, sz) !== m) {
+        if (getCube(cubeCells, x, y - 1, z, sx, sy, sz) !== m) {
           addFace(material, materialId, 1, -1, y, z, x);
         }
-        // +Z face at slice = z+1, axis 2, sign +1, u=x, v=y
-        if (getMat(cells, x, y, z + 1, sx, sy, sz) !== m) {
+        if (getCube(cubeCells, x, y, z + 1, sx, sy, sz) !== m) {
           addFace(material, materialId, 2, 1, z + 1, x, y);
         }
-        // -Z face at slice = z, axis 2, sign -1
-        if (getMat(cells, x, y, z - 1, sx, sy, sz) !== m) {
+        if (getCube(cubeCells, x, y, z - 1, sx, sy, sz) !== m) {
           addFace(material, materialId, 2, -1, z, x, y);
         }
       }
@@ -239,10 +278,180 @@ function buildFaceGroups(grid: VoxelGrid): Map<string, FaceGroup> {
   return groups;
 }
 
+/**
+ * Build one merged BufferGeometry per material from all shaped-block
+ * instances. Each box is emitted as 6 axis-aligned quads (no inter-box
+ * face culling — it's not worth the complexity for the small number of
+ * shaped blocks in a typical build).
+ */
+function buildShapedMeshes(
+  instances: ShapedInstance[],
+  materials: THREE.Material[],
+): { meshes: THREE.Mesh[]; triangles: number } {
+  if (instances.length === 0) return { meshes: [], triangles: 0 };
+
+  // Group instance boxes by materialId, then collect all boxes at world positions
+  const byMat = new Map<number, Box[]>();
+  for (const inst of instances) {
+    const boxes = shapeBoxes(inst.shape);
+    if (boxes.length === 0) continue;
+    let list = byMat.get(inst.matId);
+    if (!list) {
+      list = [];
+      byMat.set(inst.matId, list);
+    }
+    for (const b of boxes) {
+      list.push([
+        b[0] + inst.x,
+        b[1] + inst.y,
+        b[2] + inst.z,
+        b[3] + inst.x,
+        b[4] + inst.y,
+        b[5] + inst.z,
+      ]);
+    }
+  }
+
+  const meshes: THREE.Mesh[] = [];
+  let totalTriangles = 0;
+  for (const [matId, boxes] of byMat) {
+    const geometry = buildBoxesGeometry(boxes);
+    if (!geometry) continue;
+    const mesh = new THREE.Mesh(geometry, materials[matId]);
+    mesh.name = `shapes_${materials[matId].name}`;
+    meshes.push(mesh);
+    const indexAttr = geometry.getIndex();
+    totalTriangles += indexAttr ? indexAttr.count / 3 : 0;
+  }
+  return { meshes, triangles: totalTriangles };
+}
+
+const BOX_FACES: Array<{
+  // Each face: 4 corner offsets within the box (0 or 1 along each axis)
+  // and the outward normal (1 or -1 along the axis index).
+  axis: 0 | 1 | 2;
+  sign: 1 | -1;
+  corners: ReadonlyArray<readonly [number, number, number]>;
+}> = [
+  // +X face: corners on x=1, ccw viewed from +X
+  {
+    axis: 0,
+    sign: 1,
+    corners: [
+      [1, 0, 0],
+      [1, 1, 0],
+      [1, 1, 1],
+      [1, 0, 1],
+    ],
+  },
+  // -X face
+  {
+    axis: 0,
+    sign: -1,
+    corners: [
+      [0, 0, 1],
+      [0, 1, 1],
+      [0, 1, 0],
+      [0, 0, 0],
+    ],
+  },
+  // +Y face
+  {
+    axis: 1,
+    sign: 1,
+    corners: [
+      [0, 1, 0],
+      [0, 1, 1],
+      [1, 1, 1],
+      [1, 1, 0],
+    ],
+  },
+  // -Y face
+  {
+    axis: 1,
+    sign: -1,
+    corners: [
+      [0, 0, 1],
+      [0, 0, 0],
+      [1, 0, 0],
+      [1, 0, 1],
+    ],
+  },
+  // +Z face
+  {
+    axis: 2,
+    sign: 1,
+    corners: [
+      [1, 0, 1],
+      [1, 1, 1],
+      [0, 1, 1],
+      [0, 0, 1],
+    ],
+  },
+  // -Z face
+  {
+    axis: 2,
+    sign: -1,
+    corners: [
+      [0, 0, 0],
+      [0, 1, 0],
+      [1, 1, 0],
+      [1, 0, 0],
+    ],
+  },
+];
+
+function buildBoxesGeometry(boxes: Box[]): THREE.BufferGeometry | null {
+  if (boxes.length === 0) return null;
+  const vertexCount = boxes.length * 24;
+  const positions = new Float32Array(vertexCount * 3);
+  const normals = new Float32Array(vertexCount * 3);
+  const indices = new Uint32Array(boxes.length * 36);
+
+  let vOff = 0;
+  let iOff = 0;
+  for (let b = 0; b < boxes.length; b++) {
+    const [x0, y0, z0, x1, y1, z1] = boxes[b];
+    const sx = x1 - x0;
+    const sy = y1 - y0;
+    const sz = z1 - z0;
+    for (const face of BOX_FACES) {
+      const baseVertex = vOff;
+      for (let i = 0; i < 4; i++) {
+        const [cx, cy, cz] = face.corners[i];
+        const px = x0 + cx * sx;
+        const py = y0 + cy * sy;
+        const pz = z0 + cz * sz;
+        const p = vOff * 3;
+        positions[p] = px;
+        positions[p + 1] = py;
+        positions[p + 2] = pz;
+        normals[p] = face.axis === 0 ? face.sign : 0;
+        normals[p + 1] = face.axis === 1 ? face.sign : 0;
+        normals[p + 2] = face.axis === 2 ? face.sign : 0;
+        vOff++;
+      }
+      indices[iOff++] = baseVertex;
+      indices[iOff++] = baseVertex + 1;
+      indices[iOff++] = baseVertex + 2;
+      indices[iOff++] = baseVertex;
+      indices[iOff++] = baseVertex + 2;
+      indices[iOff++] = baseVertex + 3;
+    }
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
+  geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+  return geometry;
+}
+
 export interface McStructureOptimizerResult extends OptimizerResult {
   stats: OptimizerStats & {
     inputBlocks: number;
     paletteEntries: number;
+    shapedBlocks: number;
     sourceFormat: 'mcstructure';
   };
 }
@@ -252,8 +461,8 @@ export async function optimizeMcstructure(
 ): Promise<McStructureOptimizerResult> {
   const inputBytes = input.byteLength;
   const parsed = parseMcstructure(input);
-  const grid = buildVoxelGrid(parsed);
-  const groups = buildFaceGroups(grid);
+  const data = buildVoxelData(parsed);
+  const groups = buildFaceGroups(data.cubeCells, data.materials, data.dims);
 
   const scene = new THREE.Group();
   scene.name = 'optimized-minecraft-build';
@@ -269,6 +478,10 @@ export async function optimizeMcstructure(
     scene.add(mesh);
   }
 
+  const shaped = buildShapedMeshes(data.shapedInstances, data.materials);
+  for (const mesh of shaped.meshes) scene.add(mesh);
+  outputTriangles += shaped.triangles;
+
   const glb = await exportGlb(scene);
 
   return {
@@ -279,10 +492,11 @@ export async function optimizeMcstructure(
       outputBytes: glb.byteLength,
       inputTriangles: 0,
       outputTriangles,
-      materialGroups: grid.materials.length,
+      materialGroups: data.materials.length,
       voxelFaces,
-      inputBlocks: grid.filledCount,
-      paletteEntries: parsed.paletteNames.length,
+      inputBlocks: data.filledCount,
+      paletteEntries: parsed.palette.length,
+      shapedBlocks: data.shapedInstances.length,
       sourceFormat: 'mcstructure',
     },
   };
