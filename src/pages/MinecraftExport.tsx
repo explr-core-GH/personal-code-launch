@@ -1,23 +1,41 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { Box, Download, Loader2, Upload } from 'lucide-react';
 import { Header } from '@/components/wbl/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
 import { ModelPreview } from '@/components/minecraft/ModelPreview';
 import { optimizeGlb, type OptimizerStats } from '@/lib/minecraft/glbOptimizer';
 import { optimizeMcstructure } from '@/lib/minecraft/mcstructure';
+import { optimizeSchem } from '@/lib/minecraft/schem';
+import { PALETTE_PRESETS, type ColorPalette } from '@/lib/minecraft/blockColors';
+import type { OptimizeOptions, StructureOptimizerStats } from '@/lib/minecraft/voxelPipeline';
 import { cn } from '@/lib/utils';
 
 type Status = 'idle' | 'processing' | 'ready' | 'error';
+type SourceFormat = 'glb' | 'mcstructure' | 'schem';
 
-type ExtendedStats = OptimizerStats & {
-  inputBlocks?: number;
-  paletteEntries?: number;
-  sourceFormat?: 'glb' | 'mcstructure';
-};
+type ExtendedStats = OptimizerStats &
+  Partial<Omit<StructureOptimizerStats, keyof OptimizerStats>> & {
+    sourceFormat?: SourceFormat;
+  };
+
+interface UploadedFile {
+  name: string;
+  buffer: ArrayBuffer;
+  format: SourceFormat;
+}
 
 interface Result {
   fileName: string;
@@ -39,12 +57,29 @@ function formatPercent(before: number, after: number): string {
   return `−${pct.toFixed(0)}%`;
 }
 
+function detectFormat(filename: string): SourceFormat | null {
+  const lower = filename.toLowerCase();
+  if (lower.endsWith('.glb')) return 'glb';
+  if (lower.endsWith('.mcstructure')) return 'mcstructure';
+  if (lower.endsWith('.schem')) return 'schem';
+  return null;
+}
+
 const MinecraftExport = () => {
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [uploaded, setUploaded] = useState<UploadedFile | null>(null);
+  const [palette, setPalette] = useState<ColorPalette>('classic');
+  const [removeGround, setRemoveGround] = useState(false);
+  const [cropToBuilding, setCropToBuilding] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const options: OptimizeOptions = useMemo(
+    () => ({ palette, removeGround, cropToBuilding }),
+    [palette, removeGround, cropToBuilding],
+  );
 
   useEffect(() => {
     return () => {
@@ -58,39 +93,60 @@ const MinecraftExport = () => {
     };
   }, [result]);
 
-  const handleFile = useCallback(async (file: File) => {
-    const lower = file.name.toLowerCase();
-    const isGlb = lower.endsWith('.glb');
-    const isMcStructure = lower.endsWith('.mcstructure');
-    if (!isGlb && !isMcStructure) {
-      toast.error('Please upload a .glb or .mcstructure file from Minecraft Education.');
-      return;
-    }
-    setStatus('processing');
-    setError(null);
-    setResult(null);
-    try {
+  const process = useCallback(
+    async (file: UploadedFile, opts: OptimizeOptions, silent = false) => {
+      setStatus('processing');
+      setError(null);
+      try {
+        const optimized =
+          file.format === 'glb'
+            ? await optimizeGlb(file.buffer.slice(0))
+            : file.format === 'mcstructure'
+            ? await optimizeMcstructure(file.buffer.slice(0), opts)
+            : await optimizeSchem(file.buffer.slice(0), opts);
+        const baseName = file.name.replace(/\.(glb|mcstructure|schem)$/i, '');
+        setResult({
+          fileName: `${baseName}-optimized.glb`,
+          scene: optimized.scene,
+          glb: optimized.glb,
+          stats: optimized.stats as ExtendedStats,
+        });
+        setStatus('ready');
+        if (!silent) toast.success('Optimization complete!');
+      } catch (err) {
+        console.error(err);
+        const message = err instanceof Error ? err.message : 'Unknown error';
+        setError(message);
+        setStatus('error');
+        toast.error('Could not process this file.');
+      }
+    },
+    [],
+  );
+
+  const handleFile = useCallback(
+    async (file: File) => {
+      const format = detectFormat(file.name);
+      if (!format) {
+        toast.error('Upload a .glb, .mcstructure, or .schem file.');
+        return;
+      }
       const buffer = await file.arrayBuffer();
-      const optimized = isGlb
-        ? await optimizeGlb(buffer)
-        : await optimizeMcstructure(buffer);
-      const baseName = file.name.replace(/\.(glb|mcstructure)$/i, '');
-      setResult({
-        fileName: `${baseName}-optimized.glb`,
-        scene: optimized.scene,
-        glb: optimized.glb,
-        stats: optimized.stats as ExtendedStats,
-      });
-      setStatus('ready');
-      toast.success('Optimization complete!');
-    } catch (err) {
-      console.error(err);
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      setError(message);
-      setStatus('error');
-      toast.error('Could not process this file.');
-    }
-  }, []);
+      const uploadedFile: UploadedFile = { name: file.name, buffer, format };
+      setUploaded(uploadedFile);
+      setResult(null);
+      await process(uploadedFile, options);
+    },
+    [options, process],
+  );
+
+  // Re-process when options change (and a file is loaded).
+  useEffect(() => {
+    if (!uploaded) return;
+    if (uploaded.format === 'glb') return; // glb path ignores these options
+    process(uploaded, options, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [palette, removeGround, cropToBuilding]);
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -118,6 +174,8 @@ const MinecraftExport = () => {
     URL.revokeObjectURL(url);
   };
 
+  const optionsApplyToCurrent = uploaded && uploaded.format !== 'glb';
+
   return (
     <div className="min-h-screen w-full flex flex-col">
       <Header />
@@ -128,31 +186,28 @@ const MinecraftExport = () => {
             Minecraft → DelightEx Exporter
           </h1>
           <p className="text-muted-foreground mt-2">
-            Upload a <code className="text-foreground">.glb</code> or{' '}
-            <code className="text-foreground">.mcstructure</code> file from a Minecraft Education
-            Structure Block, and download an optimized version ready to import into DelightEx
-            (CoSpaces).
+            Upload a <code className="text-foreground">.glb</code>,{' '}
+            <code className="text-foreground">.mcstructure</code>, or{' '}
+            <code className="text-foreground">.schem</code> file and download an optimized version
+            ready to import into DelightEx (CoSpaces).
           </p>
         </div>
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-lg">How to get a file from Minecraft Education</CardTitle>
+            <CardTitle className="text-lg">Where do these files come from?</CardTitle>
             <CardDescription className="space-y-2">
               <p>
-                In your world, give yourself a structure block with{' '}
-                <code className="text-foreground">/give @p structure_block</code>, place it next to
-                your build, and set the size to enclose it.
+                <strong>.glb</strong> — Structure Block "3D Export" mode in Minecraft Education.
+                Best quality (real textures).
               </p>
               <p>
-                <strong>For best results,</strong> set the mode to{' '}
-                <strong>3D Export</strong> and click <strong>Export</strong> — you'll get a{' '}
-                <code>.glb</code> with the real Minecraft textures.
+                <strong>.mcstructure</strong> — Structure Block "Save" mode in Bedrock / Education.
+                Colored by block type.
               </p>
               <p>
-                <strong>Or:</strong> use <strong>Save</strong> mode and click <strong>Export</strong>{' '}
-                — you'll get a <code>.mcstructure</code> file. The exporter will color each block
-                type and convert it to a glb for you (no textures, just solid colors).
+                <strong>.schem</strong> — Java Edition with WorldEdit, Litematica, or other editors.
+                Colored by block type.
               </p>
             </CardDescription>
           </CardHeader>
@@ -176,7 +231,7 @@ const MinecraftExport = () => {
           <input
             ref={inputRef}
             type="file"
-            accept=".glb,.mcstructure,model/gltf-binary"
+            accept=".glb,.mcstructure,.schem,model/gltf-binary"
             className="hidden"
             onChange={onChange}
           />
@@ -190,7 +245,7 @@ const MinecraftExport = () => {
               <Upload className="w-8 h-8" />
               <div>
                 <p className="font-medium text-foreground">
-                  Drop your Minecraft .glb or .mcstructure file here
+                  Drop your .glb, .mcstructure, or .schem file here
                 </p>
                 <p className="text-sm mt-1">or click to choose a file</p>
               </div>
@@ -205,7 +260,7 @@ const MinecraftExport = () => {
           </Alert>
         )}
 
-        {result && status === 'ready' && (
+        {result && status !== 'error' && (
           <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="lg:col-span-2 overflow-hidden">
               <CardHeader>
@@ -215,19 +270,100 @@ const MinecraftExport = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[480px] rounded-md overflow-hidden border border-border">
+                <div className="h-[480px] rounded-md overflow-hidden border border-border relative">
                   <ModelPreview scene={result.scene} className="w-full h-full" />
+                  {status === 'processing' && (
+                    <div className="absolute inset-0 bg-background/50 flex items-center justify-center">
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
 
             <div className="space-y-4">
+              {optionsApplyToCurrent && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Options</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="palette-select" className="text-sm">
+                        Color palette
+                      </Label>
+                      <Select
+                        value={palette}
+                        onValueChange={(v) => setPalette(v as ColorPalette)}
+                      >
+                        <SelectTrigger id="palette-select">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PALETTE_PRESETS.map((p) => (
+                            <SelectItem key={p.id} value={p.id}>
+                              {p.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Checkbox
+                        id="remove-ground"
+                        checked={removeGround}
+                        onCheckedChange={(v) => setRemoveGround(v === true)}
+                      />
+                      <Label htmlFor="remove-ground" className="text-sm cursor-pointer leading-snug">
+                        Remove ground
+                        <span className="block text-xs text-muted-foreground font-normal">
+                          Skips dirt, grass, sand, gravel, etc. so the build doesn't sit on
+                          terrain.
+                        </span>
+                      </Label>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Checkbox
+                        id="crop-building"
+                        checked={cropToBuilding}
+                        onCheckedChange={(v) => setCropToBuilding(v === true)}
+                      />
+                      <Label htmlFor="crop-building" className="text-sm cursor-pointer leading-snug">
+                        Crop to building
+                        <span className="block text-xs text-muted-foreground font-normal">
+                          Re-centers the model on the visible blocks so empty space around it is
+                          gone.
+                        </span>
+                      </Label>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Result</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm">
-                  {result.stats.sourceFormat === 'mcstructure' ? (
+                  {result.stats.sourceFormat === 'glb' ? (
+                    <>
+                      <StatRow
+                        label="File size"
+                        before={formatBytes(result.stats.inputBytes)}
+                        after={formatBytes(result.stats.outputBytes)}
+                        delta={formatPercent(result.stats.inputBytes, result.stats.outputBytes)}
+                      />
+                      <StatRow
+                        label="Triangles"
+                        before={result.stats.inputTriangles.toLocaleString()}
+                        after={result.stats.outputTriangles.toLocaleString()}
+                        delta={formatPercent(
+                          result.stats.inputTriangles,
+                          result.stats.outputTriangles,
+                        )}
+                      />
+                    </>
+                  ) : (
                     <>
                       <div className="flex justify-between text-muted-foreground">
                         <span>Output .glb size</span>
@@ -241,27 +377,12 @@ const MinecraftExport = () => {
                         <span>Output triangles</span>
                         <span>{result.stats.outputTriangles.toLocaleString()}</span>
                       </div>
-                    </>
-                  ) : (
-                    <>
-                      <StatRow
-                        label="File size"
-                        before={formatBytes(result.stats.inputBytes)}
-                        after={formatBytes(result.stats.outputBytes)}
-                        delta={formatPercent(
-                          result.stats.inputBytes,
-                          result.stats.outputBytes,
-                        )}
-                      />
-                      <StatRow
-                        label="Triangles"
-                        before={result.stats.inputTriangles.toLocaleString()}
-                        after={result.stats.outputTriangles.toLocaleString()}
-                        delta={formatPercent(
-                          result.stats.inputTriangles,
-                          result.stats.outputTriangles,
-                        )}
-                      />
+                      {(result.stats.removedGroundBlocks ?? 0) > 0 && (
+                        <div className="flex justify-between text-muted-foreground">
+                          <span>Ground blocks removed</span>
+                          <span>{result.stats.removedGroundBlocks?.toLocaleString()}</span>
+                        </div>
+                      )}
                     </>
                   )}
                   <div className="flex justify-between text-muted-foreground">

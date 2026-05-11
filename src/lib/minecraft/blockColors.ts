@@ -183,13 +183,76 @@ const SKIP = new Set<string>([
 
 /**
  * Returns a CSS hex color for the given block name, or null if the block
- * should be omitted from the mesh entirely.
+ * should be omitted from the mesh entirely. The optional `palette`
+ * argument applies a color transform across the entire build for a
+ * different visual style.
  */
-export function colorForBlock(name: string): string | null {
+export function colorForBlock(
+  name: string,
+  palette: ColorPalette = 'classic',
+): string | null {
   if (SKIP.has(name)) return null;
   const known = NAMED_COLORS[name];
-  if (known) return known;
-  return hashedColor(name);
+  const base = known ?? hashedColor(name);
+  return applyPalette(base, palette);
+}
+
+export type ColorPalette = 'classic' | 'pastel' | 'monochrome' | 'neon' | 'sepia';
+
+export const PALETTE_PRESETS: Array<{
+  id: ColorPalette;
+  label: string;
+  description: string;
+}> = [
+  { id: 'classic', label: 'Classic Minecraft', description: 'The default Minecraft-ish colors.' },
+  { id: 'pastel', label: 'Pastel', description: 'Soft, washed-out colors.' },
+  { id: 'monochrome', label: 'Monochrome', description: 'Shades of gray only.' },
+  { id: 'neon', label: 'Neon', description: 'Bright, saturated, video-game colors.' },
+  { id: 'sepia', label: 'Sepia', description: 'Warm vintage tones.' },
+];
+
+/**
+ * Apply a stylistic color transform to a base hex color. Each preset is
+ * an HSL adjustment so we don't have to re-author every block color in
+ * every palette.
+ */
+function applyPalette(hex: string, palette: ColorPalette): string {
+  if (palette === 'classic') return hex;
+  const { h, s, l } = hexToHsl(hex);
+  switch (palette) {
+    case 'pastel':
+      return hslToHex(h, Math.max(15, s * 0.45), Math.min(88, l + 25));
+    case 'monochrome':
+      return hslToHex(0, 0, Math.max(15, Math.min(85, l)));
+    case 'neon':
+      return hslToHex(h, 95, Math.max(45, Math.min(60, l + 8)));
+    case 'sepia': {
+      const greyL = 0.299 * (s / 100) + l;
+      return hslToHex(35, 30, Math.max(15, Math.min(80, greyL)));
+    }
+  }
+  return hex;
+}
+
+function hexToHsl(hex: string): { h: number; s: number; l: number } {
+  const m = hex.replace('#', '');
+  const r = parseInt(m.slice(0, 2), 16) / 255;
+  const g = parseInt(m.slice(2, 4), 16) / 255;
+  const b = parseInt(m.slice(4, 6), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  let h = 0;
+  let s = 0;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60;
+  }
+  return { h, s: s * 100, l: l * 100 };
 }
 
 function hashedColor(name: string): string {
